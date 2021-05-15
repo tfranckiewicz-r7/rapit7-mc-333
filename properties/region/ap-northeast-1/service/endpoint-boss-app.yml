@@ -1,0 +1,269 @@
+---
+version: 1.0
+properties:
+  # The logging level to use for the endpoint agents.  Use the key DEFAULT to set the default logging level for all organizations, and use an org id as a key to override the logging level for thatorganization.  Valid values are CRITICAL, ERROR, WARNING, INFO,
+  endpoint.agent.logging.level: DEFAULT=INFO,ff3e4c18-a5f7-431b-91b7-288194913549=DEBUG
+  endpoint.boss.agent.update.s3url: https://s3-ap-northeast-1.amazonaws.com
+  # S3 bucket where endpoint update packages are located
+  endpoint.boss.agent.update.s3bucket: public.razor-prod-2.ap-northeast-1.insight.rapid7.com
+  # Maximum number of connections to create in the pool
+  endpoint.boss.db.connection.pool.size.max: 50
+  # Hostname of endpoint boss master database
+  endpoint.boss.db.master.host: endpointboss-master.db.razor-resource.razor-prod-2.ap-northeast-1.r7ops.com
+  # Hostname of endpoint boss replica database endpointboss-encrypted-replica-3-razor-prod-2.ct4pnhqzylfb.ap-northeast-1.rds.amazonaws.com
+  endpoint.boss.db.replica.host: endpointboss-replica-weighted.db.razor-resource.razor-prod-2.ap-northeast-1.r7ops.com
+  # Org list for disabling known ip range scan.
+  endpoint.boss.disssolvable.agent.disable.knownassetscan: ''
+  # Number of seconds after which a beacon message would represent healthy status of a host
+  endpoint.boss.healthy.beacon.threshold: 1800
+  # Mapping of organization ID's to endpoint scan agent versions. This version must be compatible with the endpoint scanner data source (an installer build).
+  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1620076296
+  # Mapping of organization ID's to endpoint agent versions. Use 'DEFAULT' for organization ID to indicate default version.
+  #  _    _  _____ ______    _____       _______ ______ _  ________ ______ _____  ______ _____
+  # | |  | |/ ____|  ____|  / ____|   /\|__   __|  ____| |/ /  ____|  ____|  __ \|  ____|  __ \
+  # | |  | | (___ | |__    | |  __   /  \  | |  | |__  | ' /| |__  | |__  | |__) | |__  | |__) |
+  # | |  | |\___ \|  __|   | | |_ | / /\ \ | |  |  __| |  < |  __| |  __| |  ___/|  __| |  _  /
+  # | |__| |____) | |____  | |__| |/ ____ \| |  | |____| . \| |____| |____| |    | |____| | \ \
+  #  \____/|_____/|______|  \_____/_/    \_\_|  |______|_|\_\______|______|_|    |______|_|  \_\
+  #
+  #  ___            ___
+  # /   \          /   \
+  # \_   \        /  __/
+  #  _\   \      /  /__
+  #  \___  \____/   __/
+  #      \_       _/
+  #        | @ @  \_
+  #        |
+  #      _/     /\
+  #     /o)  (o/\ \_
+  #     \_____/ /
+  #       \____/
+  #
+  # Rapid7 LLC - e67db2d4-b0d2-4b82-bc36-19d6bdebefbf
+  # Integration Test Org - afbb6adb-e10a-4a80-aa9d-4fd75b16afe6
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296,e67db2d4-b0d2-4b82-bc36-19d6bdebefbf=1544630321,afbb6adb-e10a-4a80-aa9d-4fd75b16afe6=1573676126
+  # Redis cache TTL for last full scan time in hours.
+  endpoint.boss.redis.full.scan.time.ttl: 24
+  # Hostname of this service's redis server.
+  endpoint.boss.redis.host: rae1e7yq9hx7djr3-0001-001.bub7bt.0001.apne1.cache.amazonaws.com
+  # Hostnames of this service's redis replica server.
+  endpoint.boss.replica.redis.hosts: rae1e7yq9hx7djr3-0001-002.bub7bt.0001.apne1.cache.amazonaws.com
+  # Enables clustering support for the redis connection.
+  endpoint.boss.redis.cluster.enabled: true
+  # The logging level to use for the dissolvable endpoint agents.  Use the key DEFAULT to set the default logging level for all organizations, and use an org id as a key to override the logging level for that organization.  Valid values are CRITICAL, ERROR, W
+  endpoint.dissolvable.agent.logging.level: DEFAULT=DEBUG
+  # Region specific Ingress service public endpoint.
+  ingress.public.endoint: endpoint.ingress.rapid7.com
+  # The region specific hostname for the public endpoint-ingress-app.
+  public.endpoint.ingress.hostname: ap.endpoint.ingress.rapid7.com
+  # The region specific hostname for the public S3 proxy.
+  public.endpoint.ingress.storage.hostname: ap.storage.endpoint.ingress.rapid7.com
+  # The per org mapping of enabling Rapid7 owned storage endpoint
+  endpoint.ingress.orgid.storage.endpoint.enabled: DEFAULT=true
+  # The desired (overriding) server selection mode for new agents. Use this to set smart mode
+  endpoint.persistent.agent.desired.server.selection.mode: DEFAULT=smart
+  # The selection mode the agent should use to choose a server in it's list to connect to.  Valid values are random, ordered. Do not set smart mode here
+  endpoint.persistent.agent.server.selection.mode: DEFAULT=ordered
+  # Mapping of orgId to the collection interval for the TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.collection_interval_minutes: DEFAULT=360
+  # Mapping of orgId to the minimum time between collections for the TEM real time job on persistent agents. 0 indicates no cooldown
+  endpoint.boss.orgid.tem_realtime.persistent.cooldown_minutes: DEFAULT=0
+  # Mapping of orgId to the minimum time between collections for the TEM real time job on dissolvable agents. 0 indicates no cooldown
+  endpoint.boss.orgid.tem_realtime.dissolvable.cooldown_minutes: DEFAULT=360
+
+  # Mapping of organization IDs whose agents should auto-update
+  endpoint.boss.orgid.agent.updates.enabled: DEFAULT=true
+
+  #
+  # tem_realtime
+  #
+
+  # Mapping of organization ID's to whether or not the TEM real time job performs delta collection
+  endpoint.boss.orgid.tem_realtime.delta_collection: DEFAULT=true
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Windows platforms. If true, the org must also be licensed for EA.
+  endpoint.boss.orgid.tem_realtime.windows.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Darwin (OSX) platforms. If true, the org must also be licensed for EA.
+  endpoint.boss.orgid.tem_realtime.darwin.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Linux platforms. If true, the org must also be licensed for EA.
+  endpoint.boss.orgid.tem_realtime.linux.enabled: DEFAULT=true
+  # Mapping of orgId to the collection interval for asset_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.asset_info.interval.minutes: DEFAULT=360,f62d0e47-1fd2-49e9-bf61-f0f40e95d2df=1440
+  # f62d0e47-1fd2-49e9-bf61-f0f40e95d2df - SoftBank Corp.
+  # Mapping of orgId to the collection interval for policy_data TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled policy_data for all orgs for the time being.
+  endpoint.boss.orgid.tem_realtime.policy_data.interval.minutes: DEFAULT=0
+  # Mapping of orgId to the collection interval for remote_execution TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.remote_execution.interval.minutes: DEFAULT=360,f62d0e47-1fd2-49e9-bf61-f0f40e95d2df=1440
+  # f62d0e47-1fd2-49e9-bf61-f0f40e95d2df - SoftBank Corp.
+  # Mapping of orgId to the collection interval for ssl_certificate_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled app_last_run_time for all orgs per performance issues, once resolved, the default will be reset.
+  endpoint.boss.orgid.tem_realtime.ssl_certificate_info.interval.minutes: DEFAULT=0
+  # Mapping of orgId to the collection interval for app_last_runtime TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled app_last_run_time for all orgs per performance issues & changes required to utilize the service. Once resolved, the default will be reset.
+  endpoint.boss.orgid.tem_realtime.app_last_run_time.interval.minutes: DEFAULT=0
+  # Mapping of orgId to the collection interval for file_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.file_info.interval.minutes: DEFAULT=360,f62d0e47-1fd2-49e9-bf61-f0f40e95d2df=1440
+  # f62d0e47-1fd2-49e9-bf61-f0f40e95d2df - SoftBank Corp.
+  # Mapping of orgId to the collection interval for registry_exporter TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.registry_exporter.interval.minutes: DEFAULT=360,f62d0e47-1fd2-49e9-bf61-f0f40e95d2df=1440
+  endpoint.boss.orgid.tem_realtime.web_server_info.interval.minutes: DEFAULT=0
+  # f62d0e47-1fd2-49e9-bf61-f0f40e95d2df - SoftBank Corp.
+  # Mapping of orgId to registry exporter mode (winreg/regexe)
+  endpoint.agent.registry.exporter.mode: DEFAULT=regexe
+
+  # Whether or not the Agent will consider system configured proxies when connecting to the platform
+  # Rapid7 LLC - e67db2d4-b0d2-4b82-bc36-19d6bdebefbf
+  # Origin Energy Limited - 89f182d1-17bd-4d25-adef-28b8e284b7a6
+  # Kasra's Test Org APNE - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  endpoint.boss.orgid.agent.proxy.enabled: DEFAULT=true,e67db2d4-b0d2-4b82-bc36-19d6bdebefbf=true,89f182d1-17bd-4d25-adef-28b8e284b7a6=true,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=false
+  # Whether or not legacy Agents (1.x) will use p2p to share updates locally with other 1.x Agents.
+  # Kasra's Test Org APNE - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  endpoint.boss.orgid.agent.update.localized.enabled: DEFAULT=true,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=false
+  #
+  # ui_realtime
+  #
+
+  # Mapping of organization ID's to whether or not the UI real time job performs delta collection for Windows platform
+  endpoint.boss.orgid.ui_realtime.windows.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the UI real time job performs delta collection for Linux platform
+  endpoint.boss.orgid.ui_realtime.linux.enabled: DEFAULT=true
+  # Mapping of organization IDs to whether or not the UI real time job is active for Darwin
+  endpoint.boss.orgid.ui_realtime.darwin.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the netowrk monitor job is enabled for Windows platform
+  endpoint.boss.orgid.network_monitor.windows.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not ad-hoc host invocations are enabled. NOTE: This does not stop currently running host invocations.
+  endpoint.boss.orgid.host_invocations.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the Agents are running in restricted mode. Organizations running Agents in restricted mode will ensure no jobs are running, refuse incoming job requests, and prevent Agent updates.
+  endpoint.boss.orgid.agent.restricted: DEFAULT=false
+  # The EA orgs with endpoint cloud proxy enabled.
+  endpoint.ea.agent.ecp.org.ids: 97cf86a8-e5b3-46e9-acec-17397098edd6,1a1b2af2-3794-4dd2-bc99-ae1682f5ec4e
+  # For the smart server selection mode, how many bad attempts we should allow before assuming server is non-responsive.
+  endpoint.agent.smart.bad.count.limit: DEFAULT=3
+  # For the smart server selection mode, how often the agent should poll the servers.
+  endpoint.agent.smart.poll.time.secs: DEFAULT=300
+  # For the smart server selection mode, how long a requester/service (beacon/msg) should wait when asking for a socket from the tracker
+  endpoint.agent.smart.wait.time.secs: DEFAULT=1
+  # For the smart server selection mode, how long a connection to a server should wait before timing out when probing. This timeout will also include the SSL handshake and thusly should be set to accomodate both network latency and a overloaded server
+  endpoint.agent.smart.socket.timeout.secs: DEFAULT=10
+  # For the smart server selection mode, the max probes to send at a time before waiting
+  endpoint.agent.smart.max.probes: DEFAULT=1
+  # Smart mode: How long to place socket in unusable state when it is not responsive
+  endpoint.agent.smart.jail.time.secs: DEFAULT=300
+  # name of the organization app sqs queue
+  organization.sqs.queue.name: ap-northeast-1-razor-prod-2-platform-organization-app-endpointBossApp
+  # Mapping of organization ids (key) to enable network range filtering feature ('true'/'false')
+  endpoint.agent.network.range.filtering: DEFAULT=false
+
+
+  # f423c30e-9ebd-46b8-8147-17ec6fbecd21 - Osaka Gas
+  # 89f182d1-17bd-4d25-adef-28b8e284b7a6 - SI-8617 - Origin-Energy-Limited
+  endpoint.agent.id.reporting.service: DEFAULT=false,f423c30e-9ebd-46b8-8147-17ec6fbecd21=true,89f182d1-17bd-4d25-adef-28b8e284b7a6=true
+  endpoint.agent.id.reporting.service.port: DEFAULT=31400
+  endpoint.agent.id.reporting.service.ip.whitelist: DEFAULT=any
+
+  #
+  # ATTRIBUTED_BEACON thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.attributed.beacon.max.fetcher.threads: 12
+  # Number of threads for processing raw blob payload notify events
+  endpoint.attributed.beacon.max.consumer.threads: 48
+  # Number of threads for blob management threads
+  endpoint.attributed.beacon.max.management.threads: 8
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.attributed.beacon.max.visibility.updater.threads: 4
+
+
+  #
+  # FILE_UPLOAD_COMPLETE thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.file.upload.complete.max.fetcher.threads: 2
+  # Number of threads for processing raw blob payload notify events
+  endpoint.file.upload.complete.max.consumer.threads: 10
+  # Number of threads for blob management threads
+  endpoint.file.upload.complete.max.management.threads: 2
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.file.upload.complete.max.visibility.updater.threads: 2
+
+  #
+  # JOB_STATUS thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.job.status.max.fetcher.threads: 2
+  # Number of threads for processing raw blob payload notify events
+  endpoint.job.status.max.consumer.threads: 10
+  # Number of threads for blob management threads
+  endpoint.job.status.max.management.threads: 2
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.job.status.max.visibility.updater.threads: 2
+
+  #
+  # JOB_STATUS retry thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.job.status.max.retry.fetcher.threads: 1
+  # Number of threads for processing raw blob payload notify events
+  endpoint.job.status.max.retry.consumer.threads: 8
+  # Number of threads for blob management threads
+  endpoint.job.status.max.retry.management.threads: 2
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.job.status.max.retry.visibility.updater.threads: 1
+
+  #
+  # BEACON_COMMANDS_REQUEST thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.beacon.commands.max.fetcher.threads: 8
+  # Number of threads for processing raw blob payload notify events
+  endpoint.beacon.commands.max.consumer.threads: 32
+  # Number of threads for blob management threads
+  endpoint.beacon.commands.max.management.threads: 12
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.beacon.commands.max.visibility.updater.threads: 2
+
+  # Api Token for accessing platform-public-api-app over Kong.
+  platform-public-api-app.kong.api.token: 8eec0998-626c-4b47-a766-8d4c360ba1d8
+
+  #
+  # le_realtime
+  #
+  endpoint.boss.orgid.le_realtime.windows.enabled: DEFAULT=true
+  endpoint.boss.orgid.le_realtime.linux.enabled: DEFAULT=true
+  endpoint.boss.orgid.le_realtime.darwin.enabled: DEFAULT=true
+
+  #
+  # ComponentConfigurationService related properties
+  #
+
+  # The component config service url
+  component-config-service.url: https://class3.ingress-prod-2.platform-ingress.r7ops.com/ccs/
+  # Whether or not the EBA should merge AgentApp configuration from CCS
+  # ITEST - afbb6adb-e10a-4a80-aa9d-4fd75b16afe6
+  # kasadzadeh test org - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  merge.agentapp.configuration.from.ccs.enabled: DEFAULT=true,afbb6adb-e10a-4a80-aa9d-4fd75b16afe6=true,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=true
+
+  # DB schema migration configuration options
+  provisioning.migrate.validation.enabled: true
+  provisioning.repair.before.migrate: false
+
+  # Whether or not the CCS beacon is enable
+  # kasadzadeh test org - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  endpoint.boss.orgid.ccs.beacon.enabled: DEFAULT=true,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=true
+
+  # CCS beacon interval
+  # kasadzadeh test org - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  endpoint.boss.orgid.ccs.beacon.interval: DEFAULT=300,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=30
+
+
+  # Whether or not we process "job.status.failed" events for quarantine jobs.
+  # Kasra test org - e49d4c9b-8f88-4b4b-85ab-05f8658c2dca
+  endpoint.boss.process.quarantine.job.status.failed.enabled: DEFAULT=true,e49d4c9b-8f88-4b4b-85ab-05f8658c2dca=true
+
+  # host ids to turn on verbose beacon commands logging
+  hostid.verbose.beacon.commands.logging: 4240d64b9e48599b2489dee67d817774,710649719b955f775a8024a98a260215

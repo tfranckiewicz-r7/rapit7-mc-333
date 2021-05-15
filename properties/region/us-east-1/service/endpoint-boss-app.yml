@@ -1,0 +1,780 @@
+---
+version: 1.0
+properties:
+  # The logging level to use for the endpoint agents.  Use the key DEFAULT to set the default logging level for all organizations, and use an org id as a key to override the logging level for thatorganization.  Valid values are CRITICAL, ERROR, WARNING, INFO,
+  # 44b0b50f-d411-4c42-9fc9-cd9de214926f -  Rapid7 - Policy Testing (Replicants Test Org)
+  # 063f3da6-b75f-4574-a876-91b115df6aab - Wolverines Test Org
+  endpoint.agent.logging.level: DEFAULT=INFO,063f3da6-b75f-4574-a876-91b115df6aab=DEBUG,14f8eba8-46c8-474b-a982-29476e7a8bd8=DEBUG,5b39c83d-405b-46ae-bfaf-0d8750c0e8a6=DEBUG,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=DEBUG,343b52d5-b015-4886-8952-c462a1bc6d2e=DEBUG,3fc041b8-2f4a-43f1-a9d7-10c7af7807ae=DEBUG,aa6ee8c8-b533-402b-8850-d41c85c1081e=DEBUG,b44406df-facc-467d-a938-f6590b3c497a=DEBUG,96e91d49-e7aa-41e1-9ff9-9db0844c5f5d=DEBUG,6488287f-3760-4e64-a331-9010c3b4b819=DEBUG,8afdb2ff-9474-46d5-bf63-6b52f5327ae3=DEBUG,44b0b50f-d411-4c42-9fc9-cd9de214926f=DEBUG,e44aef78-1767-4c21-89d5-099fe5ba333f=DEBUG
+  # S3 bucket where endpoint update packages are located
+  endpoint.boss.agent.update.s3bucket: com.rapid7.razor.public
+  # Maximum number of connections to create in the pool.
+  # There should be at least one connection per message consumer thread plus a handful extra for REST calls.
+  endpoint.boss.db.connection.pool.size.max: 80
+  # Hostname of endpoint boss master database
+  endpoint.boss.db.master.host: endpointboss-master.db.razor-resource.razor-prod-1.us-east-1.r7ops.com
+  # Hostname of endpoint boss replica database
+  endpoint.boss.db.replica.host: endpointboss-replica-weighted-test.db.razor-resource.razor-prod-1.us-east-1.r7ops.com
+  # Org list for disabling known ip range scan.
+  endpoint.boss.disssolvable.agent.disable.knownassetscan: ''
+  # Number of seconds after which a beacon message would represent healthy status of a host
+  endpoint.boss.healthy.beacon.threshold: 31
+  # Beacon Interval in Seconds
+  endpoint.orgid.agent.beacon.interval: DEFAULT=30,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60
+  # Mapping of organization ID's to endpoint scan agent versions. This version must be compatible with the endpoint scanner data source (an installer build).
+  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1620076296,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=1620076296
+  # Mapping of organization ID's to endpoint agent versions. Use 'DEFAULT' for organization ID to indicate default version.
+  # e2cef714-f5ae-4659-8138-76fd6a1d50d0 - R7
+  # 343b52d5-b015-4886-8952-c462a1bc6d2e - Internal Integration Testing
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - Internal - DCA
+  # 88b25059-b599-464c-8a2e-6cff4611de18 - Texas DPS.  Texas DPS needs to give the "ok" before any upgrades to their agent, so keep their release pinned here.
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeartMedia. Pinned
+  # f7de4a94-bbaa-4817-b493-56a2aa0e1ddf - Casey's needs to be able to control the update of the agent.
+  # 686fbbbc-4166-45ac-8a41-ef5920624c17 - Milbank, Tweed, Hadley & McCloy LLP, Pinned SI-5829
+  # b795b7c9-5f40-4981-b481-f68bbc712977 - Elliot Health System
+  # 2c9a191d-0b61-4167-a23d-c4b4cd91028a - Catalina - DO NOT UPDATE - The Agent must remain compatible with Windows XPe
+  # 0c2e5b57-1601-4905-b4fd-3eaaaa4d8c8c - Rackspace, SI-6756
+  # 5c388fc6-6646-4aa5-92be-594f58fcfdfe - TruGreen. Pinned (SI-7067)
+  # 851096de-42b2-430b-95a3-8d6b9e73baea - Arkansas Blue Cross & Blue Shield Pinned (SI-7138)
+  # GATED RELEASES
+  # Phase 1
+  # 30b420ab-19c4-44af-8915-55849234fe83
+  # c6841829-6cc7-4ce4-bdc6-e975b190da84
+  # 6517844b-8928-479e-afc8-e122abf9920d
+  # 169e7f4b-d651-4950-8ab5-4e9c73892b04
+  # b9514654-2b65-4ffd-8379-402cc32abd72
+  # 237c05da-7f31-4c27-a3a4-a69e0e2373c4
+  # 5b438972-850b-4c3a-90c0-f21c22366557
+  # 00ac24e8-104d-4cfa-bae6-66eb43ac05a7
+  # a60d5cd7-1dad-4614-a255-8951803a4acc
+  # dee20144-44b7-41f9-9c0a-b852f938543d
+  # Phase 2
+  # 37dbabac-507e-47c8-8417-8a104a73fdb0
+  # 737b8d13-1ce8-41ad-8698-6af30b102bc1
+  # 69157076-ff39-4189-9818-85241b466509
+  # cfe01ff0-98e5-4b41-9a24-7782e4f933fc
+  # 01acfeaf-9eb6-4a87-af56-9bec609d2797
+  # 4fbd3442-2e1c-41e7-8a43-514af1ab3306
+  # aa6ee8c8-b533-402b-8850-d41c85c1081e
+  # cd9f246b-629c-48f0-be45-05af3195f7d7
+  # 03c662aa-54cc-43b2-a67b-dcb1aa275930
+  # 3f711ee0-550f-41c4-8382-da0d191ef89a
+  # 8647b89e-7008-4009-b5b5-6e1455e37bc5
+  # eb392a0e-abe0-4d57-a7f6-86050cd02c36
+  # 2223db94-9f6d-44cf-867b-ae42f860e90b
+  # fb62eb1c-655b-4ec2-a803-0da51f68f29e
+  # 3dc896d3-71e2-4bf3-bbef-4a4b3832d326
+  # 3786e1e8-672b-4885-9815-4cf22faa23bf
+  # Phase 3
+  # bbd1b8b0-780d-4dbb-b8df-dfe2e95d1c2a
+  # fdc38e88-5ff4-4a23-80f5-627132f75f1f
+  # d0d4b122-d2e5-44fc-93d9-d40eda241647
+  # f22a5af4-22fb-4614-a25c-432a65365aa5
+  # 62f385f0-fdfe-4733-a24f-098dd4eb2d08
+  # d9a5d625-5261-40ea-9a18-6f20c2b8d032
+  # 1522c327-b521-4149-8c65-8d96505f8ee0
+  # 357c907b-eeb6-4f61-a774-485dc748e667
+  # edc19914-bfae-4fc4-873a-86d2e69adf21
+  # 3c62348e-7364-465d-a002-914d08f015d2
+  # e63a9193-3ecb-4afa-a317-c897fb29a270
+  # b376d470-6244-42f0-baad-eb71c9da033f
+  # b4132b33-0f91-49ec-a3b4-7fe7b235edf5
+  # ba1bbe39-6e6b-4248-be53-3f522a55454c
+  # b70b7829-a11a-4a40-aa84-863062d99df6
+  # 03b21713-500c-4495-9436-db50ddd0db7c
+  # 5976743e-8ae4-4da8-abb3-ffbe8589d8f8
+  # 7e3c813d-9469-4119-bc1c-69d587feeb5c
+  # 4600153b-3d53-43d2-8ccb-532b19dff3b7
+  # 0b281c68-dd1b-4e4c-b57c-0e65b8a4adb6
+  # d269a2c8-7bed-4389-ad25-3d2d8861aaf7
+  # 4752ee65-e430-4ba5-8339-50148a7dbbfe
+  # ecf0189f-0752-4ab5-a067-af0736e2493d
+  # 696061cb-67a6-4ee0-8281-3768d447f00a
+  # 8b49974d-2e71-457c-b070-6bf162ba3de4
+  #  _    _  _____ ______    _____       _______ ______ _  ________ ______ _____  ______ _____
+  # | |  | |/ ____|  ____|  / ____|   /\|__   __|  ____| |/ /  ____|  ____|  __ \|  ____|  __ \
+  # | |  | | (___ | |__    | |  __   /  \  | |  | |__  | ' /| |__  | |__  | |__) | |__  | |__) |
+  # | |  | |\___ \|  __|   | | |_ | / /\ \ | |  |  __| |  < |  __| |  __| |  ___/|  __| |  _  /
+  # | |__| |____) | |____  | |__| |/ ____ \| |  | |____| . \| |____| |____| |    | |____| | \ \
+  #  \____/|_____/|______|  \_____/_/    \_\_|  |______|_|\_\______|______|_|    |______|_|  \_\
+  #
+  #  ___            ___
+  # /   \          /   \
+  # \_   \        /  __/
+  #  _\   \      /  /__
+  #  \___  \____/   __/
+  #      \_       _/
+  #        | @ @  \_
+  #        |
+  #      _/     /\
+  #     /o)  (o/\ \_
+  #     \_____/ /
+  #       \____/
+  #
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296,343b52d5-b015-4886-8952-c462a1bc6d2e=1554913774,01ba6a17-1516-4417-87da-8deff590dbb0=1478127134,2c9a191d-0b61-4167-a23d-c4b4cd91028a=1538704800,686fbbbc-4166-45ac-8a41-ef5920624c17=1544630321,88b25059-b599-464c-8a2e-6cff4611de18=1478127134,9f8aa3a8-edce-4e7b-83ae-d321deplace13bee35=1509978973,b795b7c9-5f40-4981-b481-f68bbc712977=1550188700,f7de4a94-bbaa-4817-b493-56a2aa0e1ddf=1507053283,0c2e5b57-1601-4905-b4fd-3eaaaa4d8c8c=1558719734,5c388fc6-6646-4aa5-92be-594f58fcfdfe=1548357692,851096de-42b2-430b-95a3-8d6b9e73baea=1559328709,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1563904488
+  # Mapping of host ID's to endpoint agent versions. This overrides any organization ID setting. 'DEFAULT' is NOT supported by this property.
+  # 75dac975f22b16e9fd9f49607dbb9a05 - Casey's (securityteamlab.caseys.local)
+  # ec01262abf8d73913af540eeb44ef424 - Capital District Physicians' Health Plan Inc. (XASDSK001T.int.cdphp.com)
+  # bf9e73d11c67ac243c1bcc07ae1d0b4d - tfisher's development environment (Ubuntu 18.04 LTS)
+  # 01122f936019dba827389d5e0fdeb6b5 - tfisher's development environment (Windows XP Embedded (XPe))
+  # 3987cf417ac31d94172b6789c5fe16fa - tosmun - tor-mbp-3442
+  # 0f619a7889b2e278441b1742075fb760 - Adityas' test agent id
+  # a35cdc0fcf28c79e4c5a0850e29e93f2 - kasadzadeh's development environment (mac)
+  # fe8375dcad8ced192b78da70c6b08dc0 - tosmun - Catalina PoS appliance
+  # 8c17581dcbd97db400dd3b4a6e44b993 - tosmun - VM windowsxpbox
+  endpoint.boss.hostid.agentversion.mapping: 75dac975f22b16e9fd9f49607dbb9a05=1507053283,ec01262abf8d73913af540eeb44ef424=1529333514,bf9e73d11c67ac243c1bcc07ae1d0b4d=1530229233,01122f936019dba827389d5e0fdeb6b5=1539197970,a35cdc0fcf28c79e4c5a0850e29e93f2=1531336452,fe8375dcad8ced192b78da70c6b08dc0=1538704800,8c17581dcbd97db400dd3b4a6e44b993=1536768369,3987cf417ac31d94172b6789c5fe16fa=1539197970
+  # Mapping of IT system host IDs for ongoing staged deployments
+  # Also includes:
+  # amurray - tor-mbp-3825 (MacOS 10.13): 6a43fb08665665f675a95d9f62ec7c96
+  # amurray - amurray-desktop (Ubuntu 16.04): 7ea1bdb17fe0f5d25fcc48ce66c2605a
+  # amurray - tor-p50-4394 (Windows 10): 5b54772a490862e1defcb948bffac6fc
+  # bmckeown - machine name (OS type): add Agent ID here
+  # gravindran - tor-mbp-3512 (MacOS 10.13): 24fd3b3a72f66a34804fa9a427ec2bfc
+  # jsouthern - tor-x260-2305 (Windows 10): 7261e388effb744b7b0bf735a3743c47
+  # jsouthern - jsouthern-ThinkStation-P510 (Ubuntu 16.04): 93d83acfeab75046e69ebb90b3904f3
+  # jsouthern - tor-mbp-3824 (MacOS 10.13): 61c2885cbd39702dbad52af23d2dcf7a
+  # jyeung - machine name (OS type): add Agent ID here
+  # mgarewal - tor-x260-2306 (Windows 10): c9d52c10395a1495d50e83f34862a61d
+  # mgarewal - tor-mbp-3826 (MacOS 10.13): 4ebc125e87123dc04878a973bf7b62d5
+  # mgarewal - mgarewal (Ubuntu 16.04): e179d4d0b5f55a4a94f505b6a44993ac
+  # endpoint.boss.hostid.agentversion.mapping: 75dac975f22b16e9fd9f49607dbb9a05=1507053283,6a43fb08665665f675a95d9f62ec7c96=1521122280,7ea1bdb17fe0f5d25fcc48ce66c2605a=1521122280,5b54772a490862e1defcb948bffac6fc=1521122280,24fd3b3a72f66a34804fa9a427ec2bfc=1521122280,7261e388effb744b7b0bf735a3743c47=1521122280,93d83acfeab75046e69ebb90b3904f3=1521122280,61c2885cbd39702dbad52af23d2dcf7a=1521122280,c9d52c10395a1495d50e83f34862a61d=1521122280,4ebc125e87123dc04878a973bf7b62d5=1521122280,e179d4d0b5f55a4a94f505b6a44993ac=1521122280,02ffba16337cb92d7ced894086348712=1521122280,74a324e9bf8b6c7a10fe7bf00f24ae63=1521122280,0e35dbd3d3509c480f5ab4059d6b24e5=1521122280,13a9e5567366bb85d1392f520a6098b0=1521122280,ad9931ffa23bf3cf4ab97b85075c1b8c=1521122280,18625aaaccf25276f4f0c422131ef895=1521122280,e7ddf3aff8ba45d51631712bf17d86c4=1521122280,a7b4defc0d5850986708f56a35833de8=1521122280,e762a34c5aa60801cebb25d37706f0ae=1521122280,c096665d8f5db0e3ee189c40154e9007=1521122280,49c6d3e3e0e0cb2168e6ac07dc6b0a3e=1521122280,1a3eb12b69dcb53e6be93ffa2c6ea727=1521122280,e6c06a90cda220dd377ceb399e2a3451=1521122280,24b51c85cbf2b2bf9cad77218031eda6=1521122280,e75b6815c81d290901c10845f84c1a49=1521122280,f21abce3b2e941611428352334a74e14=1521122280,2bef31dd0fc57a4fa1e55b980759f5b3=1521122280,fff4e015b1253b496dc36ffc96691b0c=1521122280,d5e67fbb8f918195329c71b336160a30=1521122280,82ee279cef632ca9563d07d5fd30d62c=1521122280,36b7de67d9fa7cd0f3be91210f76c066=1521122280
+
+  # Mapping of organization IDs whose agents should auto-update
+  # 343b52d5-b015-4886-8952-c462a1bc6d2e - Internal Integration Testing
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - Internal - DCA
+  # 843619e8-2744-4eb1-a217-709df2261152 - The J. Jill Group
+  # 52f286cd-6ad7-46a9-aa12-9dd1ca63c68e - IPMG
+  # e60d33e0-f86e-41eb-be60-545a5d9593b9 - Comptroller of Maryland
+  # Mapping of organization IDs whose agents should NOT auto-update
+  # 09bd4165-3e95-4978-8f3f-ecf9935b7103 - NBN Co Ltd.
+  # d286e1db-3b47-4410-9ef0-38d109258c92 - NBN Co Ltd.
+  # ed58dc82-cf55-4097-8965-8815652fa5b7 - NBN Co Ltd.
+  # 5de30fda-cb37-4298-ba16-2011c1197b03 - Spirit AeroSystems
+  # 8a03d879-4494-47b0-b969-d243e13420b1 - Brightstar Co (cf. DCA-10320)
+  # 8ea49d43-93ae-41fd-b6e2-0a6029d3c487 - Equity Residential
+  # 686fbbbc-4166-45ac-8a41-ef5920624c17 - Milbank, Tweed, Hadley & McCloy LLP (Disabled due to 03/29/18 agent outage)
+  # 67979719-601d-4b04-b7d1-a445189ddd1e - InsightVM Test Org
+  # 2d31e9ff-03e9-4687-b1b2-4741e13d9640 - B & H Photovideo - SI-6815
+  # b10467c9-4994-4ba2-95dc-0e62bc901a04 - VVH
+  # 115f297f-8fa0-4f32-bc4c-b4a7dddec578 - Capital District Physician's Heath Plans - SI-6873
+  # ea9579cf-2009-4950-9691-3805cc34c2c0 - AAA-Northeast
+  # 070a10ce-35cf-4514-92eb-389cc22adfd3 - Taconic Capital
+  # 63d15dac-3301-44a8-86ec-31b7b51b30bb - Gannett Co., Inc.
+  # 80d784e2-2a4d-4e82-819a-ea82a2319891 - Shelter Insurance Companies
+  # 88343bf1-de1d-4671-8e91-623e24412d4b - SurveyMonkey
+  # 2eda8b3a-13f1-4d22-8109-cab0d24ff045 - Kohler Co.
+  # 8cda959c-f9e9-47e3-a107-d35e9fd14b10 - Nacoal
+  # c1fda014-3b61-47d5-bb9f-cc03f1942739 - Exelixis
+  # 3a8fcc89-7eed-41a3-931e-dc0d9d8ab408 - Shire Human Genetic Therapies, Inc
+  # b1fc3a34-2002-40ab-937b-e83f89d6595e - Sinclair Broadcast Group, Inc.
+  # 3417f1bd-ae0b-4442-9e8f-d2cb5a1d68f3 - At Home
+  # a41b6750-01ba-4e47-a2b8-b144b617821e - United Federal Credit Union
+  # 4d3d3667-2869-4681-b1f4-2ecd984bc537 - National Association of Insurance Commissioners
+  # c604a86e-1d6e-435d-b3bc-d5ed1fb469e7 - AmeriHome Mortgage Company
+  # 127e6535-3b27-4634-ae8a-11e011fa15e5 - Cooley Godward Kronish LLP
+  # 97fbd5fe-5e0b-499d-9702-dfb4d87b93ea - JM Family Enterprise Inc.
+  # 8575fca3-7b61-413b-9b09-d631c7511371 - Hendrickson
+  # 156379b8-bfaa-4cce-9385-51841642eed2 - MRI Software LLC
+  # d1062d1a-a2cd-4a91-a83e-9c0ac5a3b2db - Arent Fox LLP
+  # d3e00235-68fd-4ac5-9a16-e480135a294b - Port of Corpus Christi
+  # 6b957315-bf4b-46fd-a3f4-a448d933bd64 - Cass Information Systems Inc.
+  # f1eaafa6-0133-4d8f-8a3d-459e76db721f - Zeta Global
+  # 0007e192-bce3-45ae-99c3-a43558483087 - Washington Health Benefit Exchange
+  # 2d7db567-b7fa-4548-bec6-5485b6baa7d0 - ACT, Inc.
+  # d55d8e7a-feee-4c39-ab00-6ef34b8c5699 - McWhinney
+  # 0990e3a0-d3f5-4ebb-b4bc-58f72b39e9fa - Phillips-Van Heusen Corporation
+  # 4ff36c3f-3e5b-4ba8-a909-fa000feff11c - PETCO Animal Supplies, Inc.
+  # 13220384-aae2-4b62-a92f-c0c18cf706e1 - Moneytree
+  # 63b07993-c5f7-48f8-9286-0a1bf4a60922 - Prime Lending
+  # 8845bbb0-6768-41d3-814f-0e42346fb3c1 - Kraton Polymers
+  # a962e324-3881-4cd7-9d92-b41443204002 - Watts Water Technologies, Inc.
+  # 8575fca3-7b61-413b-9b09-d631c7511371 - Hendrickson
+  # 9fbd886f-dc63-4e54-ab2c-e55fd7dab8f1 - Trustmark
+  # 74149c25-e98d-4b8d-85ef-71a8a357f23f - Karyopharm Therapeutics Inc.
+  # 68f01478-6b4f-4ad1-98af-04074f024426 - Hankey Group
+  # 815cab25-f1eb-4294-abde-710b015a9369 - StarrCompanies
+  # 2bf05b3b-d1fb-4488-8261-d794cbc1c9d5 - Autodesk, Inc.
+  # e9d4e87c-0383-43e8-b36e-b0133e13132c - Virginia State Cooperation Commision
+  # dd8aac6e-726e-4acc-a494-57c3ca48aff1 - Red Ventures
+  # 61096ae8-aea9-4ddf-b9d9-19bdc663fa32 - infor (requested by Areeba)
+  # eaffe729-14f0-49a1-97c2-104007296f02 - Sheridan
+  # 94f69926-8b65-4836-8b8a-83284fd5203c - Western Governors University
+  # 5a2ed0d5-50c8-4e08-b27c-fd80fb844380 - Texas Lottery Commission 
+  # d053c1c2-58f2-47fb-b86c-c41d8a5e6cc4 - University of Kansas Medical Center
+  # 1c2800ce-ca16-4b9b-83b1-897c2329a22c - Catholic Medical Center
+  # d0cd7f45-0459-4530-a93f-c209db151c86 - Ciena Corporation
+  # 73cac933-0fb3-4473-aa08-8044750cb63c - Simpson Thacher & Bartlett LLP 2
+  # 3df4a47c-ccb6-4994-89e6-65ca264f2072 - Rockwell Automation
+  # 92febc9f-b521-4a2e-a6e6-527b0c763095 - ZeroChaos
+  # d731581d-d563-4f05-a190-adfa987fa489 - Wilbur-Ellis Company
+  # 4195e759-47a2-49a5-9ad2-c1b5eba52e0d - HHA eXchange
+  endpoint.boss.orgid.agent.updates.enabled: DEFAULT=false,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=true,09bd4165-3e95-4978-8f3f-ecf9935b7103=false,d286e1db-3b47-4410-9ef0-38d109258c92=false,ed58dc82-cf55-4097-8965-8815652fa5b7=false,5de30fda-cb37-4298-ba16-2011c1197b03=false,8a03d879-4494-47b0-b969-d243e13420b1=false,8ea49d43-93ae-41fd-b6e2-0a6029d3c487=false,67979719-601d-4b04-b7d1-a445189ddd1e=false,2d31e9ff-03e9-4687-b1b2-4741e13d9640=true,115f297f-8fa0-4f32-bc4c-b4a7dddec578=false,ea9579cf-2009-4950-9691-3805cc34c2c0=false,070a10ce-35cf-4514-92eb-389cc22adfd3=false,63d15dac-3301-44a8-86ec-31b7b51b30bb=true,fd2c07ec-03c3-46dd-a57d-637801b6027c=true,61096ae8-aea9-4ddf-b9d9-19bdc663fa32=true,1aeeb08b-91d3-42f3-a826-d27d2d2244ce=true,843619e8-2744-4eb1-a217-709df2261152=true,80db8cce-5131-414c-a9d0-f5cde2007f0a=true,343b52d5-b015-4886-8952-c462a1bc6d2e=true,01b6cb98-97e9-41f4-80dc-a495aca898e9=true,0f80689b-5019-4361-8da1-31e121e2e0ec=true,26dd1d55-66b2-4157-bb19-a95f74eca162=true,cd9f246b-629c-48f0-be45-05af3195f7d7=true,fd2c07ec-03c3-46dd-a57d-637801b6027c=true,26dd1d55-66b2-4157-bb19-a95f74eca162=true,d87d4500-e1a9-4cf0-a7c5-97583b9349d9=true,0df19f25-2efb-4411-bda6-8b900e709ad2=true,80d784e2-2a4d-4e82-819a-ea82a2319891=true,88343bf1-de1d-4671-8e91-623e24412d4b=true,2eda8b3a-13f1-4d22-8109-cab0d24ff045=true,79f5b81c-dc13-4113-a8f6-0eab29976139=true,8cda959c-f9e9-47e3-a107-d35e9fd14b10=true,c1fda014-3b61-47d5-bb9f-cc03f1942739=true,3a8fcc89-7eed-41a3-931e-dc0d9d8ab408=true,b1fc3a34-2002-40ab-937b-e83f89d6595e=true,3417f1bd-ae0b-4442-9e8f-d2cb5a1d68f3=true,a41b6750-01ba-4e47-a2b8-b144b617821e=true,4d3d3667-2869-4681-b1f4-2ecd984bc537=true,c604a86e-1d6e-435d-b3bc-d5ed1fb469e7=true,127e6535-3b27-4634-ae8a-11e011fa15e5=true,97fbd5fe-5e0b-499d-9702-dfb4d87b93ea=true,8575fca3-7b61-413b-9b09-d631c7511371=true,156379b8-bfaa-4cce-9385-51841642eed2=true,d1062d1a-a2cd-4a91-a83e-9c0ac5a3b2db=true,d3e00235-68fd-4ac5-9a16-e480135a294b=true,6b957315-bf4b-46fd-a3f4-a448d933bd64=true,f1eaafa6-0133-4d8f-8a3d-459e76db721f=true,0007e192-bce3-45ae-99c3-a43558483087=true,2d7db567-b7fa-4548-bec6-5485b6baa7d0=true,d55d8e7a-feee-4c39-ab00-6ef34b8c5699=true,0990e3a0-d3f5-4ebb-b4bc-58f72b39e9fa=true,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=true,13220384-aae2-4b62-a92f-c0c18cf706e1=true,63b07993-c5f7-48f8-9286-0a1bf4a60922=true,8845bbb0-6768-41d3-814f-0e42346fb3c1=true,a962e324-3881-4cd7-9d92-b41443204002=true,8575fca3-7b61-413b-9b09-d631c7511371=true,9fbd886f-dc63-4e54-ab2c-e55fd7dab8f1=true,74149c25-e98d-4b8d-85ef-71a8a357f23f=true,68f01478-6b4f-4ad1-98af-04074f024426=true,815cab25-f1eb-4294-abde-710b015a9369=true,2bf05b3b-d1fb-4488-8261-d794cbc1c9d5=true,e9d4e87c-0383-43e8-b36e-b0133e13132c=true,dd8aac6e-726e-4acc-a494-57c3ca48aff1=true,61096ae8-aea9-4ddf-b9d9-19bdc663fa32=true,eaffe729-14f0-49a1-97c2-104007296f02=true,94f69926-8b65-4836-8b8a-83284fd5203c=true,5a2ed0d5-50c8-4e08-b27c-fd80fb844380=true,d053c1c2-58f2-47fb-b86c-c41d8a5e6cc4=true,1c2800ce-ca16-4b9b-83b1-897c2329a22c=true,d0cd7f45-0459-4530-a93f-c209db151c86=true,52f286cd-6ad7-46a9-aa12-9dd1ca63c68e=true,73cac933-0fb3-4473-aa08-8044750cb63c=true,3df4a47c-ccb6-4994-89e6-65ca264f2072=true,e60d33e0-f86e-41eb-be60-545a5d9593b9=true,92febc9f-b521-4a2e-a6e6-527b0c763095=true,d731581d-d563-4f05-a190-adfa987fa489=true,4195e759-47a2-49a5-9ad2-c1b5eba52e0d=true
+  # Mapping of host IDs whose agents should auto-update
+  # ba9c79369c429527d23c08428a4369e2 - Staging server for Redner's Market so they can whitelist updated agent versions and update their pin above
+  endpoint.boss.hostid.agent.updates.enabled: DEFAULT=true,ba9c79369c429527d23c08428a4369e2=false
+
+  # FIM Whitelist Customization
+  # Org specific whitelist additions for Windows extensions
+  # Format: ORG_ID_1=.bat;.ini,ORG_ID_2=.foo;bar
+  # 63b07993-c5f7-48f8-9286-0a1bf4a60922 - Prime Lending
+  # 510fdd38-f122-4e2a-b2a2-d680c8142988 - City of Seattle
+  # 4ad59dcd-4926-4a8a-9e7d-098c60f4aade - The Oregon Clinic-e8c133cf-c3a9-42b1-8cbe-68a1dc367da4
+  # 3b7e7e93-2907-4674-b6f1-12eb8367b2dc - HealthPlan Serices, Inc.
+  # 3303cd64-c11f-425d-9e57-3d1f890d4443 - LA Times
+  # b094e006-044e-4aa9-978a-706a2e1f555a - Anonymoose
+  # 8e9cd37b-6a0f-4e59-9a6c-5cc981e806ee - Simlab
+  # 1db79ff8-9d65-497a-9fc3-ec6b34e89b61 - World Education Services (support reference: 00257442)
+  # eaf8967b-2cd3-4a14-9555-401cb2907e5d - Central Square Tech (support reference: 00263125)
+  # b98f409b-c5d8-4dcf-8e90-a3fb2d2422e0 - Covius Holdings (Org name: Covius, reference case 00264185)
+  # 747c00f6-13f7-4a78-943c-ba97fdc5427a - Office Ally - Production (Case 00279179, 00286395)
+  # 811496c8-19c0-4642-8540-2f9ed3acaa98 - Office Ally (Case 00279179, 00286395)
+  # 1f1ad76b-31b4-4f99-8f75-db501ee81e84 - White Castle System, Inc. (Support case: 00299830)
+  # 96b80609-5cf6-47ae-9323-92413d106489 - Accurate Group (Support case 00313114)
+  # 0e8b5856-863a-4920-a6d5-d7401651875a - Credit Union Of Southern California (00327902)
+  # fca7637b-ef3a-45a9-9387-25c8d2917ce8 - GCS System (00327699) 
+  endpoint.boss.fim.whitelist.org.windows.ends.with: "\
+      1db79ff8-9d65-497a-9fc3-ec6b34e89b61=.ps1,\
+      63b07993-c5f7-48f8-9286-0a1bf4a60922=.wtf,\
+      510fdd38-f122-4e2a-b2a2-d680c8142988=.aspx;.css;.inc;.html;.js;.ascx;.asmx,\
+      4ad59dcd-4926-4a8a-9e7d-098c60f4aade=.tif;.tiff,\
+      3b7e7e93-2907-4674-b6f1-12eb8367b2dc=.doc;.docx;.xls;.xlxs;.csv;.txt,\
+      3303cd64-c11f-425d-9e57-3d1f890d4443=.xslt;.xml;.ps;.ps1;.fmx;.ora,\
+      b094e006-044e-4aa9-978a-706a2e1f555a=.xlsx;.docx;.doc;.xls;.ps1,\
+      8e9cd37b-6a0f-4e59-9a6c-5cc981e806ee=.xlsx;.docx;.doc;.xls;.txt,\
+      eaf8967b-2cd3-4a14-9555-401cb2907e5d=.xml,\
+      b98f409b-c5d8-4dcf-8e90-a3fb2d2422e0=.pdf;.csv;.xls;.xlsx;.txt;.htm;.html;.mhtml;.ppt;.pptx;.tif;.xml,\
+      747c00f6-13f7-4a78-943c-ba97fdc5427a=.xml;.pdf;.xls;.hl7;.CCDA;.txt;.xxx;.jpg;.7z;.zzz;.M4T;.soa;.rpt;.MDB;.xsl;.bak;.837p;.json;.asax;.ico;.aspx;.ashx;.template;.js;.pdb;.css;.del;.cfs;.tii;.tis;.gen;.prx;.fdx;.frq;.fnm;.nrm;.fdt;.nupkg;.dacpac;.cs;.csproj;.sln;.md;.gif;.svc;.cache;.vb;.vbproj;.user;.sql;.sqlproj;.ts;.html;.map;.resx;.browser;.nuspec;.props;.targets;.settings;.myapp;.scc;.dtsconfig;.copycomplete;.bcp;.csv;.dtsx;.tmpl;.837,\
+      811496c8-19c0-4642-8540-2f9ed3acaa98=.xml;.pdf;.xls;.hl7;.CCDA;.7z;.zzz;.M4T;.soa;.rpt;.MDB;.xsl;.bak;.837p;.json;.asax;.ico;.aspx;.ashx;.template;.js;.pdb;.css;.del;.cfs;.tii;.tis;.gen;.prx;.fdx;.frq;.fnm;.nrm;.fdt;.nupkg;.dacpac;.cs;.csproj;.sln;.md;.gif;.svc;.cache;.vb;.vbproj;.user;.sql;.sqlproj;.ts;.html;.map;.resx;.browser;.nuspec;.props;.targets;.settings;.myapp;.scc;.dtsconfig;.copycomplete;.bcp;.csv;.dtsx;.tmpl;.837,\
+      1f1ad76b-31b4-4f99-8f75-db501ee81e84=.aspx;.aspx.cs;.web.config,\
+      2b6d6a2a-d585-49a9-b44c-08c9129f8c4f=.gpg;.bak;.lock;.pub;.ppk;.key;.txt,\
+      96b80609-5cf6-47ae-9323-92413d106489=.ps1,\
+      0e8b5856-863a-4920-a6d5-d7401651875a-.json,\
+      fca7637b-ef3a-45a9-9387-25c8d2917ce8=.xml,\
+      "
+
+# FIM Whitelist Customization
+  # Org specific whitelist additions for Linux paths
+  # Format: ORG_ID_1=/opt/foo;/opt/bar,ORG_ID_2=/opt/baz
+  # 2caf4fe5-3213-4164-a4a7-d4eca2b4fe25 - ControlCase PVT Ltd 1
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - DCA_testbed
+  # 52bc19f7-a1e0-441c-bf6f-15fbd4130169 - JM Bullion Inc.
+  # 0a35ee9b-c1b0-4014-adcc-b326490c3790 - Reflex Media
+  # fca7637b-ef3a-45a9-9387-25c8d2917ce8 - GCS System
+  endpoint.boss.fim.whitelist.org.linux.starts.with: "\
+     686a33ec-88b9-4f84-bddf-2a1fb0fecb85=/usr/lib,\
+     2caf4fe5-3213-4164-a4a7-d4eca2b4fe25=/usr/lib;/lib;/lib64,\
+     52bc19f7-a1e0-441c-bf6f-15fbd4130169=/var/www;/mnt/shared;/var/www/shared,\
+     0a35ee9b-c1b0-4014-adcc-b326490c3790=/opt;/lib;/usr/lib;/var/www,\
+     fca7637b-ef3a-45a9-9387-25c8d2917ce8=.xml,\
+     5c6cd296-7acb-4f40-b152-46e9e749d973=/var/www/phoenix/shared/config;/var/www/phoenix/shared/keys;/etc/nginx/secrets;/etc/nginx/ssl;/var/www/hermes/shared/config;/var/www/hermes/shared/config/environments;/var/www/leviathan/shared/config/environments;/var/www/leviathan/shared/config,\
+     "
+
+  # Redis cache TTL for last full scan time in hours.
+  endpoint.boss.redis.full.scan.time.ttl: 1
+  # Hostname of this service's redis server.
+  endpoint.boss.redis.host: raeqlsc0jhij22m.il7sjd.clustercfg.use1.cache.amazonaws.com
+  # Hostnames of this service's redis replica server.
+  endpoint.boss.replica.redis.hosts: raeqlsc0jhij22m.il7sjd.clustercfg.use1.cache.amazonaws.com
+  # Enables clustering support for the redis connection.
+  endpoint.boss.redis.cluster.enabled: true
+  # The logging level to use for the dissolvable endpoint agents.  Use the key DEFAULT to set the default logging level for all organizations, and use an org id as a key to override the logging level for that organization.  Valid values are CRITICAL, ERROR, W
+  endpoint.dissolvable.agent.logging.level: DEFAULT=INFO
+  # The region specific hostname for the public endpoint-ingress-app.
+  public.endpoint.ingress.hostname: endpoint.ingress.rapid7.com
+  # The region specific hostname for the public S3 proxy.
+  public.endpoint.ingress.storage.hostname: us.storage.endpoint.ingress.rapid7.com
+  # The per org mapping of enabling Rapid7 owned storage endpoint
+  endpoint.ingress.orgid.storage.endpoint.enabled: DEFAULT=true
+  # The desired (overriding) server selection mode for new agents. Use this to set smart mode
+  # 343b52d5-b015-4886-8952-c462a1bc6d2e is ordered for now to facilitate faster testing
+  # a71ee523-b8bd-4977-a756-9264275b7131 MorningStar
+  # 7051b6ba-d10f-41e6-a34e-1290fae8190e Equifax Inc (SI-8808)
+  # 58ec2d7c-fb19-4123-9162-c09bf0fcf34a Intel Inc. (SI-9620)
+  endpoint.persistent.agent.desired.server.selection.mode: DEFAULT=smart,343b52d5-b015-4886-8952-c462a1bc6d2e=smart,0cf79c47-b922-4dc9-b56d-fd6a1d9aaf0f=ordered,a71ee523-b8bd-4977-a756-9264275b7131=ordered,7051b6ba-d10f-41e6-a34e-1290fae8190e=ordered,58ec2d7c-fb19-4123-9162-c09bf0fcf34a=ordered,0231a601-1058-47bf-9b26-f59804385863=ordered
+  # The selection mode the agent should use to choose a server in it's list to connect to.  Valid values are random, ordered. Do not set smart mode here
+  endpoint.persistent.agent.server.selection.mode: DEFAULT=ordered
+  # For the smart server selection mode, how many bad attempts we should allow before assuming server is non-responsive.
+  endpoint.agent.smart.bad.count.limit: DEFAULT=3,343b52d5-b015-4886-8952-c462a1bc6d2e=10
+  # For the smart server selection mode, how often the agent should poll the servers.
+  endpoint.agent.smart.poll.time.secs: DEFAULT=300,343b52d5-b015-4886-8952-c462a1bc6d2e=15
+  # For the smart server selection mode, how long a requester/service (beacon/msg) should wait when asking for a socket from the tracker
+  endpoint.agent.smart.wait.time.secs: DEFAULT=1
+  # For the smart server selection mode, how long a connection to a server should wait before timing out when probing. This timeout will also include the SSL handshake and thusly should be set to accomodate both network latency and a overloaded server
+  endpoint.agent.smart.socket.timeout.secs: DEFAULT=10,343b52d5-b015-4886-8952-c462a1bc6d2e=180
+  # For the itest org, set the smart socket start ttl to 1, ensuring it can scale up and beacon to platform on fresh installs
+  endpoint.agent.smart.socket.ttl.start: DEFAULT=16,343b52d5-b015-4886-8952-c462a1bc6d2e=1
+  # For the smart server selection mode, the max probes to send at a time before waiting
+  endpoint.agent.smart.max.probes: DEFAULT=1,343b52d5-b015-4886-8952-c462a1bc6d2e=5
+  # Smart mode: How long to place socket in unusable state when it is not responsive
+  endpoint.agent.smart.jail.time.secs: DEFAULT=300
+  #
+  # tem_realtime
+  #
+  # 5de30fda-cb37-4298-ba16-2011c1197b03 - Spirit AeroSystems
+  # f4163f94-684e-4bbd-8b1a-36e0ccfcce4e - Freedom Alliance
+  # 9410b2b6-9c60-42b0-a00a-d5bb041f12cd - Inter-American Development Bank
+  # d0cd7f45-0459-4530-a93f-c209db151c86 - Ciena Corporation
+  # 8e51a3c5-2ad2-4bb7-833e-6432e160f0a2 - Noble Systems Corporation
+  # 335eeb28-efd6-4e27-a36a-7223d1e0276a - ANSYS Inc.
+  # 822d00ce-3392-4911-b132-4751aed4bb89 - Publicis (Leo Burnett Worldwide, Inc.)
+  # 3df4a47c-ccb6-4994-89e6-65ca264f2072 - Rockwell Automation
+  # 2c85d026-f7cc-4c49-a884-220b6ddae71f - Sutter Health
+  # 54dbe0a4-86bd-45ba-a6cd-21d883b0f39b - MoneyGram Payment Systems Inc.
+  # 7b4968e2-e8dc-4632-b6ee-dea7e4521d5a - Dell 5
+  # 2c85d026-f7cc-4c49-a884-220b6ddae71f - Sutter Health InsigthVM
+  # 995aedbe-0290-41e7-b6ee-ec60cc1f7756 - Infinity Healthcare
+  # 38f4a621-ba21-43a9-ac9e-2ac91beb6582 - Envision POP
+  # 0b898322-60c3-4001-96f6-68ffd5823ef2 - Envision Healthcare
+  # eaffe729-14f0-49a1-97c2-104007296f02 - Sheridan
+  # 8b27f3ee-3639-4a2e-a024-acc030b59206 - VEeco
+  # 82109fa4-0510-45b9-adb5-947fd5ef2e7e - PDT Partners
+  # 55dd6820-248b-4faf-8cb5-68695c768793 - Nationwide Insurance
+  # 251c7e7c-8543-4b38-bdea-355f2e76a556 - Trihealth
+  # fc0fa623-f5ed-4b61-9b71-f2c294607d7e - Amcor
+  # a6580963-691e-4563-8c17-eb9a5bf5572f - Dell
+  #
+  # Tem jobs (except asset_info) disabled for following due to license limit issue see DCA-11935:
+  # e802fdf1-2766-45b1-805a-6ad61023542c - Esco
+  # 8a03d879-4494-47b0-b969-d243e13420b1 - Brightstar Co (cf. DCA-10320)
+  # a8d99210-5395-4c5c-ad7c-ab0f8139c863 - Redner’s Markets.
+  # 0b898322-60c3-4001-96f6-68ffd5823ef2 - Envision
+  # 76430d8a-2be8-4464-bf5c-678be4afc9b7 - Universal-Technical-Institute,-Inc. (SI-5076)
+  # b9f8d08b-fa27-4cc9-8d85-35e69b39342d - Wilbur-Ellis
+  # df3f11c4-724e-4743-8be3-0df6366c967f - SpokeCommuncation
+  # 765c779d-c783-44f0-b1a0-c6c54ee6f4d0 - JMFamily PVS
+  # 70d7aaa7-50e3-4ea3-86b8-72897c6270d2 - Rothschild
+  # 4ff36c3f-3e5b-4ba8-a909-fa000feff11c - PETCO
+  # 8cbb3aee-d63f-487c-9bff-1d345844e7ca - Second Test Org
+  # b1e1531c-267b-4be9-a0bc-09f36c2b4fad - Daktronics, Inc.
+  
+
+  # Mapping of orgId to the time(in seoncds) until collection is forced for cpu monitoring, 0 indicates we start collection right away(i.e. disable cpu monitor)
+  endpoint.boss.orgid.tem_realtime.force_collection_seconds: DEFAULT=0,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=10800,3bdb219a-2eb1-49f8-acaa-8e51eb420ee2=10800,ad124788-02a7-4936-a1be-64667e7e0762=10800,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=900,55dd6820-248b-4faf-8cb5-68695c768793=21600
+  # Mapping of orgId to the cpu usage threshold used to determine if user has been idle in the past [polling_interval] seconds
+  endpoint.boss.orgid.tem_realtime.cpu_threshold: DEFAULT=10
+  # Mapping of ordId to the time(in seconds) required for the user to be idle before we start collection
+  endpoint.boss.orgid.tem_realtime.inactive_seconds: DEFAULT=120,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=900,55dd6820-248b-4faf-8cb5-68695c768793=21600
+
+  # Mapping of orgId to the collection interval for the TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  endpoint.boss.orgid.tem_realtime.collection_interval_minutes: DEFAULT=360,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60,f4163f94-684e-4bbd-8b1a-36e0ccfcce4e=720,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=1440,d0cd7f45-0459-4530-a93f-c209db151c86=1440,8e51a3c5-2ad2-4bb7-833e-6432e160f0a2=540,335eeb28-efd6-4e27-a36a-7223d1e0276a=1440,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1440,28f92c01-da8a-4cf1-a63f-cf97df3d66b1=1440,70d7aaa7-50e3-4ea3-86b8-72897c6270d2=720,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=1440,822d00ce-3392-4911-b132-4751aed4bb89=1440,3df4a47c-ccb6-4994-89e6-65ca264f2072=1440,8cbb3aee-d63f-487c-9bff-1d345844e7ca=0,2c85d026-f7cc-4c49-a884-220b6ddae71f=1440,54dbe0a4-86bd-45ba-a6cd-21d883b0f39b=1440,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,995aedbe-0290-41e7-b6ee-ec60cc1f7756=1440,38f4a621-ba21-43a9-ac9e-2ac91beb6582=1440,0b898322-60c3-4001-96f6-68ffd5823ef2=1440,eaffe729-14f0-49a1-97c2-104007296f02=1440,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180,8b27f3ee-3639-4a2e-a024-acc030b59206=240,82109fa4-0510-45b9-adb5-947fd5ef2e7e=720,251c7e7c-8543-4b38-bdea-355f2e76a556=1440,fc0fa623-f5ed-4b61-9b71-f2c294607d7e=0,892c0676-31b3-4ef9-903f-d0a663ec5d09=90
+  # Mapping of orgId to the collection interval for asset_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Mapping of orgId to the collection interval for asset_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # 765c779d-c783-44f0-b1a0-c6c54ee6f4d0 - JMFamily PVS
+  # d931d65c-1c1a-45f8-b4ea-83fa3b607a0c - VDS SI-9257
+  # ad35cec0-76b4-4c52-adb7-f77a0c4d102f - Dell 2
+  # 3b08c9e1-9c78-4331-adf1-a3b1e106568f - Dell 3
+  endpoint.boss.orgid.tem_realtime.asset_info.interval.minutes: DEFAULT=360,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60,f4163f94-684e-4bbd-8b1a-36e0ccfcce4e=720,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=1440,d0cd7f45-0459-4530-a93f-c209db151c86=1440,8e51a3c5-2ad2-4bb7-833e-6432e160f0a2=540,335eeb28-efd6-4e27-a36a-7223d1e0276a=1440,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1440,28f92c01-da8a-4cf1-a63f-cf97df3d66b1=1440,70d7aaa7-50e3-4ea3-86b8-72897c6270d2=720,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=1440,822d00ce-3392-4911-b132-4751aed4bb89=1440,3df4a47c-ccb6-4994-89e6-65ca264f2072=1440,9c4d50ee-9140-4934-b1a4-97d4fef27437=1440,d931d65c-1c1a-45f8-b4ea-83fa3b607a0c=120,8cbb3aee-d63f-487c-9bff-1d345844e7ca=0,2c85d026-f7cc-4c49-a884-220b6ddae71f=1440,54dbe0a4-86bd-45ba-a6cd-21d883b0f39b=1440,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,ad35cec0-76b4-4c52-adb7-f77a0c4d102f=4320,3b08c9e1-9c78-4331-adf1-a3b1e106568f=4320,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180,8b27f3ee-3639-4a2e-a024-acc030b59206=240,82109fa4-0510-45b9-adb5-947fd5ef2e7e=720,251c7e7c-8543-4b38-bdea-355f2e76a556=1440,a6580963-691e-4563-8c17-eb9a5bf5572f=4320,892c0676-31b3-4ef9-903f-d0a663ec5d09=90
+  # Mapping of orgId to the collection interval for policy_data TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled policy_job for all orgs except for DCA.
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - DCA - Testbed
+  # 27c959e5-2893-422b-9068-d40503f383f6 - LendingTree
+  # 3b689952-8fb5-4eb2-b920-d14094b8c00f - MHI Shared Services Americas, Inc.
+  # 97fbd5fe-5e0b-499d-9702-dfb4d87b93ea - JVM Family
+  # c2f6f7e1-b968-494d-b992-1a86d716a7fe - Cambridge Savings Bank
+  # 0d47b584-0df6-4e3d-90d5-60c51d9f5106 - Indeed.com
+  # 7b4968e2-e8dc-4632-b6ee-dea7e4521d5a - Dell
+  # dfa798df-48e0-4c25-90b1-f59f6599248b - National Geographic Society
+  # 6a518166-088f-4cb6-90c7-96dd82767c8e - PCC Structurals
+  # bb009cef-b3a2-48a1-9da0-85e983a82541 - Nike
+  # 8d2221dd-476a-4b1e-a38d-a087dbd05fd9 - WellStar Health
+  # 8e9cd37b-6a0f-4e59-9a6c-5cc981e806ee - SimLab
+  # 5cd18f1a-7c66-4105-8772-daa5abd02534 - Idaho Department of Health and Welfare
+  # 7c39a3c9-cc01-41da-a215-76aefcaa6822 - H&R Block
+  # 25a15bb9-6c80-454a-9f90-ca7ae4439ac3 - Discovery Communications
+  # 9533f0ad-a670-4128-969a-87b2820c6e82 - WW-Grainger
+  # 05f7ca89-ac38-4b48-82cf-413eb7e6079a - Atlassian
+  # 1fdd4281-3249-4a9b-bc35-c4fa37b1496f - Geico
+  # f7c4bf6c-3fec-4a57-9fda-d5eb34081b20 - Rackspace Hosting Internal
+  # 99331bfa-0ca2-423f-8600-534d02ab9dae - BJC Health Care
+  # de74af65-78fb-4862-8d5a-c45debedd841 - American Student Assistance
+  # bf0c32e9-ef25-465a-bbdd-797bbfc071b8 - Ohio National
+  # d1f98681-c117-4f29-a248-c5a76757c0e4 - Teradyne
+  # a874d4b4-e12a-4072-84c6-598d0d4cfd13 - Medtronic
+  # b48da3a1-3039-4233-914c-2e9451f0e55c - Computronix
+  # 2eda8b3a-13f1-4d22-8109-cab0d24ff045 - Kohler
+  # 44b0b50f-d411-4c42-9fc9-cd9de214926f - Replicants - Testbed
+  # 1a1c44e1-da00-4c9a-94c3-d6a7c63a0f89 - Paychex
+  # 78e20c07-26ed-43f0-bc47-f9ff11778b4c - ServiceNow
+  # 116d4831-cb03-4b36-bd75-c7376c077589 - Internal R7 testbed
+  endpoint.boss.orgid.tem_realtime.policy_data.interval.minutes: DEFAULT=0,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=360,27c959e5-2893-422b-9068-d40503f383f6=360,3b689952-8fb5-4eb2-b920-d14094b8c00f=360,97fbd5fe-5e0b-499d-9702-dfb4d87b93ea=360,c2f6f7e1-b968-494d-b992-1a86d716a7fe=360,0d47b584-0df6-4e3d-90d5-60c51d9f5106=360,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,dfa798df-48e0-4c25-90b1-f59f6599248b=360,6a518166-088f-4cb6-90c7-96dd82767c8e=360,bb009cef-b3a2-48a1-9da0-85e983a82541=360,8e9cd37b-6a0f-4e59-9a6c-5cc981e806ee=360,8d2221dd-476a-4b1e-a38d-a087dbd05fd9=360,5cd18f1a-7c66-4105-8772-daa5abd02534=360,7c39a3c9-cc01-41da-a215-76aefcaa6822=0,25a15bb9-6c80-454a-9f90-ca7ae4439ac3=0,9533f0ad-a670-4128-969a-87b2820c6e82=360,05f7ca89-ac38-4b48-82cf-413eb7e6079a=360,1fdd4281-3249-4a9b-bc35-c4fa37b1496f=360,f7c4bf6c-3fec-4a57-9fda-d5eb34081b20=360,99331bfa-0ca2-423f-8600-534d02ab9dae=0,de74af65-78fb-4862-8d5a-c45debedd841=360,bf0c32e9-ef25-465a-bbdd-797bbfc071b8=360,d1f98681-c117-4f29-a248-c5a76757c0e4=360,a874d4b4-e12a-4072-84c6-598d0d4cfd13=360,b48da3a1-3039-4233-914c-2e9451f0e55c=360,2eda8b3a-13f1-4d22-8109-cab0d24ff045=360,44b0b50f-d411-4c42-9fc9-cd9de214926f=60,1a1c44e1-da00-4c9a-94c3-d6a7c63a0f89=360,78e20c07-26ed-43f0-bc47-f9ff11778b4c=360,116d4831-cb03-4b36-bd75-c7376c077589=360,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180
+  # Mapping of orgId to the collection interval for remote_execution TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # 765c779d-c783-44f0-b1a0-c6c54ee6f4d0 - JMFamily PVS
+  # 958bd558-b5f5-4c5c-8ce1-5efebd45e30a Tivit Terceirização de Processos Serviços e Tecnologia S/A - disabled tem jobs except asset_info
+  # 70d7aaa7-50e3-4ea3-86b8-72897c6270d2 - Rothschild
+  # 54dbe0a4-86bd-45ba-a6cd-21d883b0f39b - MoneyGram Payment Systems Inc.
+  # ad35cec0-76b4-4c52-adb7-f77a0c4d102f - Dell 2
+  # 3b08c9e1-9c78-4331-adf1-a3b1e106568f - Dell 3
+  endpoint.boss.orgid.tem_realtime.remote_execution.interval.minutes: DEFAULT=360,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60,f4163f94-684e-4bbd-8b1a-36e0ccfcce4e=720,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=1440,d0cd7f45-0459-4530-a93f-c209db151c86=1440,ed326ec6-c578-4ee6-8ee7-52eb9a3bec60=0,e802fdf1-2766-45b1-805a-6ad61023542c=0,8a03d879-4494-47b0-b969-d243e13420b1=0,a8d99210-5395-4c5c-ad7c-ab0f8139c863=0,0b898322-60c3-4001-96f6-68ffd5823ef2=0,76430d8a-2be8-4464-bf5c-678be4afc9b7=0,b9f8d08b-fa27-4cc9-8d85-35e69b39342d=0,df3f11c4-724e-4743-8be3-0df6366c967f=0,8e51a3c5-2ad2-4bb7-833e-6432e160f0a2=540,335eeb28-efd6-4e27-a36a-7223d1e0276a=1440,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1440,958bd558-b5f5-4c5c-8ce1-5efebd45e30a=0,28f92c01-da8a-4cf1-a63f-cf97df3d66b1=1440,70d7aaa7-50e3-4ea3-86b8-72897c6270d2=720,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=1440,822d00ce-3392-4911-b132-4751aed4bb89=1440,3df4a47c-ccb6-4994-89e6-65ca264f2072=1440,9c4d50ee-9140-4934-b1a4-97d4fef27437=1440,d931d65c-1c1a-45f8-b4ea-83fa3b607a0c=120,8cbb3aee-d63f-487c-9bff-1d345844e7ca=0,2c85d026-f7cc-4c49-a884-220b6ddae71f=0,b1e1531c-267b-4be9-a0bc-09f36c2b4fad=0,54dbe0a4-86bd-45ba-a6cd-21d883b0f39b=1440,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,ad35cec0-76b4-4c52-adb7-f77a0c4d102f=4320,3b08c9e1-9c78-4331-adf1-a3b1e106568f=4320,995aedbe-0290-41e7-b6ee-ec60cc1f7756=1440,38f4a621-ba21-43a9-ac9e-2ac91beb6582=1440,0b898322-60c3-4001-96f6-68ffd5823ef2=1440,eaffe729-14f0-49a1-97c2-104007296f02=1440,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180,8b27f3ee-3639-4a2e-a024-acc030b59206=240,82109fa4-0510-45b9-adb5-947fd5ef2e7e=720,251c7e7c-8543-4b38-bdea-355f2e76a556=1440,fc0fa623-f5ed-4b61-9b71-f2c294607d7e=0,a6580963-691e-4563-8c17-eb9a5bf5572f=4320,892c0676-31b3-4ef9-903f-d0a663ec5d09=90
+  # Mapping of orgId to the collection interval for ssl_certificate_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled ssl_certificate_info for all orgs per performance issues. Once resolved, the default will be reset.
+  endpoint.boss.orgid.tem_realtime.ssl_certificate_info.interval.minutes: DEFAULT=0
+  # Mapping of orgId to the collection interval for app_last_runtime TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # Disabled app_last_run_time for all orgs per performance issues & changes required to utilize the service. Once resolved, the default will be reset.
+  endpoint.boss.orgid.tem_realtime.app_last_run_time.interval.minutes: DEFAULT=0
+  # Mapping of orgId to the collection interval for file_info TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # 765c779d-c783-44f0-b1a0-c6c54ee6f4d0 - JMFamily PVS
+  # 70d7aaa7-50e3-4ea3-86b8-72897c6270d2 - Rothschild
+  # 4ff36c3f-3e5b-4ba8-a909-fa000feff11c - PETCO
+  # 54dbe0a4-86bd-45ba-a6cd-21d883b0f39b - MoneyGram Payment Systems Inc.
+  # ad35cec0-76b4-4c52-adb7-f77a0c4d102f - Dell 2
+  # 3b08c9e1-9c78-4331-adf1-a3b1e106568f - Dell 3
+  endpoint.boss.orgid.tem_realtime.file_info.interval.minutes: DEFAULT=360,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60,f4163f94-684e-4bbd-8b1a-36e0ccfcce4e=720,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=1440,d0cd7f45-0459-4530-a93f-c209db151c86=1440,ed326ec6-c578-4ee6-8ee7-52eb9a3bec60=0,e802fdf1-2766-45b1-805a-6ad61023542c=0,8a03d879-4494-47b0-b969-d243e13420b1=0,a8d99210-5395-4c5c-ad7c-ab0f8139c863=0,0b898322-60c3-4001-96f6-68ffd5823ef2=0,76430d8a-2be8-4464-bf5c-678be4afc9b7=0,b9f8d08b-fa27-4cc9-8d85-35e69b39342d=0,df3f11c4-724e-4743-8be3-0df6366c967f=0,8e51a3c5-2ad2-4bb7-833e-6432e160f0a2=540,335eeb28-efd6-4e27-a36a-7223d1e0276a=1440,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1440,958bd558-b5f5-4c5c-8ce1-5efebd45e30a=0,28f92c01-da8a-4cf1-a63f-cf97df3d66b1=1440,70d7aaa7-50e3-4ea3-86b8-72897c6270d2=720,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=1440,822d00ce-3392-4911-b132-4751aed4bb89=1440,3df4a47c-ccb6-4994-89e6-65ca264f2072=1440,9c4d50ee-9140-4934-b1a4-97d4fef27437=1440,d931d65c-1c1a-45f8-b4ea-83fa3b607a0c=120,8cbb3aee-d63f-487c-9bff-1d345844e7ca=0,2c85d026-f7cc-4c49-a884-220b6ddae71f=0,b1e1531c-267b-4be9-a0bc-09f36c2b4fad=0,54dbe0a4-86bd-45ba-a6cd-21d883b0f39b=1440,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,ad35cec0-76b4-4c52-adb7-f77a0c4d102f=4320,3b08c9e1-9c78-4331-adf1-a3b1e106568f=4320,995aedbe-0290-41e7-b6ee-ec60cc1f7756=1440,38f4a621-ba21-43a9-ac9e-2ac91beb6582=1440,0b898322-60c3-4001-96f6-68ffd5823ef2=1440,eaffe729-14f0-49a1-97c2-104007296f02=1440,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180,8b27f3ee-3639-4a2e-a024-acc030b59206=240,82109fa4-0510-45b9-adb5-947fd5ef2e7e=720,251c7e7c-8543-4b38-bdea-355f2e76a556=1440,fc0fa623-f5ed-4b61-9b71-f2c294607d7e=0,a6580963-691e-4563-8c17-eb9a5bf5572f=4320,892c0676-31b3-4ef9-903f-d0a663ec5d09=90
+  # Mapping of orgId to the collection interval for registry_exporter TEM real time job in minutes on persistent agents. 0 indicates no periodic collection.
+  # 765c779d-c783-44f0-b1a0-c6c54ee6f4d0 - JMFamily PVS
+  # 70d7aaa7-50e3-4ea3-86b8-72897c6270d2 - Rothschild
+  # 4ff36c3f-3e5b-4ba8-a909-fa000feff11c - PETCO
+  # 54dbe0a4-86bd-45ba-a6cd-21d883b0f39b - MoneyGram Payment Systems Inc.
+  # ad35cec0-76b4-4c52-adb7-f77a0c4d102f - Dell 2
+  # 3b08c9e1-9c78-4331-adf1-a3b1e106568f - Dell 3
+  endpoint.boss.orgid.tem_realtime.registry_exporter.interval.minutes: DEFAULT=360,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60,f4163f94-684e-4bbd-8b1a-36e0ccfcce4e=720,9410b2b6-9c60-42b0-a00a-d5bb041f12cd=1440,d0cd7f45-0459-4530-a93f-c209db151c86=1440,ed326ec6-c578-4ee6-8ee7-52eb9a3bec60=0,e802fdf1-2766-45b1-805a-6ad61023542c=0,8a03d879-4494-47b0-b969-d243e13420b1=0,a8d99210-5395-4c5c-ad7c-ab0f8139c863=0,0b898322-60c3-4001-96f6-68ffd5823ef2=0,76430d8a-2be8-4464-bf5c-678be4afc9b7=0,b9f8d08b-fa27-4cc9-8d85-35e69b39342d=0,df3f11c4-724e-4743-8be3-0df6366c967f=0,8e51a3c5-2ad2-4bb7-833e-6432e160f0a2=540,335eeb28-efd6-4e27-a36a-7223d1e0276a=1440,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1440,958bd558-b5f5-4c5c-8ce1-5efebd45e30a=0,28f92c01-da8a-4cf1-a63f-cf97df3d66b1=1440,70d7aaa7-50e3-4ea3-86b8-72897c6270d2=720,4ff36c3f-3e5b-4ba8-a909-fa000feff11c=1440,822d00ce-3392-4911-b132-4751aed4bb89=1440,3df4a47c-ccb6-4994-89e6-65ca264f2072=1440,9c4d50ee-9140-4934-b1a4-97d4fef27437=1440,d931d65c-1c1a-45f8-b4ea-83fa3b607a0c=120,8cbb3aee-d63f-487c-9bff-1d345844e7ca=0,2c85d026-f7cc-4c49-a884-220b6ddae71f=0,b10467c9-4994-4ba2-95dc-0e62bc901a04=0,b1e1531c-267b-4be9-a0bc-09f36c2b4fad=0,54dbe0a4-86bd-45ba-a6cd-21d883b0f39b=1440,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=1440,ad35cec0-76b4-4c52-adb7-f77a0c4d102f=4320,3b08c9e1-9c78-4331-adf1-a3b1e106568f=4320,995aedbe-0290-41e7-b6ee-ec60cc1f7756=1440,38f4a621-ba21-43a9-ac9e-2ac91beb6582=1440,0b898322-60c3-4001-96f6-68ffd5823ef2=1440,eaffe729-14f0-49a1-97c2-104007296f02=1440,d64be9fc-0a6a-4def-8cff-2dfaad0259b3=180,8b27f3ee-3639-4a2e-a024-acc030b59206=240,82109fa4-0510-45b9-adb5-947fd5ef2e7e=720,251c7e7c-8543-4b38-bdea-355f2e76a556=1440,fc0fa623-f5ed-4b61-9b71-f2c294607d7e=0,a6580963-691e-4563-8c17-eb9a5bf5572f=4320,892c0676-31b3-4ef9-903f-d0a663ec5d09=90
+  # ae7bbbd0-ba73-49c0-b162-8847966e0c52 - UNFI
+  # addc4053-422e-450a-b47c-f99c1a2bfacd - American Tire Distributors
+  # 34b5f25a-62ea-468f-8bf0-c6a9b5cc93c4 - Republic Finance
+  # 5585d545-3fa4-4920-a2e1-c996f1ab2934 - Hypertherm
+  # 77775664-a096-4a27-a523-d1cc826b1c9a - Kubota USA
+  # 8666619d-da93-4e3f-9cb5-ac10985c3c51 - Virtuoso
+  # f51ca20e-adba-49ff-94a8-f78461d86a17 - Midfirst Bank
+  # 737b8d13-1ce8-41ad-8698-6af30b102bc1 - McGraw Hill
+  # a9837420-aa83-40d3-a0e0-ed06183b579d - Marex Spectron
+  # 709c17f9-f2ab-4c5f-961d-52b7a20975bf
+  # b4594255-10ca-4177-9acc-a2550ebe8064 - E2open - merged with Amber Roads
+  # 4041e216-99df-43d9-a3ba-c803e3a97779 - Netsmart
+  # 91472016-642c-4d7d-a95d-038a444fe4a6 - Cengage
+  # 71107d9b-381e-43e9-82ba-dc8310a9dde9 - Asure Software Inc
+  # e2cef714-f5ae-4659-8138-76fd6a1d50d0 - Rapid7
+  # cadf76d8-fe6d-47b4-b8a3-02fc4a0f6daf - Epic Games
+  # bd203546-dc50-4d85-9a3a-16c8986d7b72 - Epic Games
+  # 8697674d-07d5-4779-93f1-e51ed8796ca9 - Jacobs Engineering Group Inc
+  endpoint.boss.orgid.tem_realtime.web_server_info.interval.minutes: DEFAULT=0,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=360,ae7bbbd0-ba73-49c0-b162-8847966e0c52=360,addc4053-422e-450a-b47c-f99c1a2bfacd=360,34b5f25a-62ea-468f-8bf0-c6a9b5cc93c4=360,5585d545-3fa4-4920-a2e1-c996f1ab2934=360,77775664-a096-4a27-a523-d1cc826b1c9a=360,8666619d-da93-4e3f-9cb5-ac10985c3c51=360,f51ca20e-adba-49ff-94a8-f78461d86a17=360,737b8d13-1ce8-41ad-8698-6af30b102bc1=360,a9837420-aa83-40d3-a0e0-ed06183b579d=360,709c17f9-f2ab-4c5f-961d-52b7a20975bf=360,b4594255-10ca-4177-9acc-a2550ebe8064=360,4041e216-99df-43d9-a3ba-c803e3a97779=360,91472016-642c-4d7d-a95d-038a444fe4a6=360,71107d9b-381e-43e9-82ba-dc8310a9dde9=360,e2cef714-f5ae-4659-8138-76fd6a1d50d0=360,cadf76d8-fe6d-47b4-b8a3-02fc4a0f6daf=360,bd203546-dc50-4d85-9a3a-16c8986d7b72=360,8697674d-07d5-4779-93f1-e51ed8796ca9=360
+  # af3779d3-3dac-4aa9-8e50-b6faa4cc44cc - IMS (set to winreg SI-7076)
+  # b324d94a-3cf4-4a58-95b7-8d6bd0668130 - ovo_energy
+  # 8a9e06d3-bfa8-458f-afc3-0ab2fb997a0e - abb-optical
+  # c93535c9-5016-4a8b-b19e-27e0e0dffc5e - knoll
+  # 0b898322-60c3-4001-96f6-68ffd5823ef2 - envision
+  # 696061cb-67a6-4ee0-8281-3768d447f00a - volunteer corporate credit union
+  # 9581aeee-4893-4199-ad4b-1f4667309e92 - xilinx
+  # 9533f0ad-a670-4128-969a-87b2820c6e82 - ww grainger
+  # 63b07993-c5f7-48f8-9286-0a1bf4a60922 - hilltop securities
+  # 4fcd40c6-f71c-423b-a4e0-36a6e1f8dc5b - upmc
+  # 13088dc8-5665-4d2d-bb1c-4310c8de1c3d - zirmed
+  # 43d20cab-67f2-456b-9dad-8ab09e7fdd3b - Great Lakes Dredge and Dock
+  # 1a176d14-3074-4876-8b4c-7e3b3623b2c6 - InterLinc Mortgage Services
+  endpoint.agent.registry.exporter.mode: DEFAULT=regexe,af3779d3-3dac-4aa9-8e50-b6faa4cc44cc=winreg,b324d94a-3cf4-4a58-95b7-8d6bd0668130=winreg,8a9e06d3-bfa8-458f-afc3-0ab2fb997a0e=winreg,c93535c9-5016-4a8b-b19e-27e0e0dffc5e=winreg,0b898322-60c3-4001-96f6-68ffd5823ef2=winreg,696061cb-67a6-4ee0-8281-3768d447f00a=winreg,9581aeee-4893-4199-ad4b-1f4667309e92=winreg,9533f0ad-a670-4128-969a-87b2820c6e82=winreg,63b07993-c5f7-48f8-9286-0a1bf4a60922=winreg,4fcd40c6-f71c-423b-a4e0-36a6e1f8dc5b=winreg,13088dc8-5665-4d2d-bb1c-4310c8de1c3d=winreg,43d20cab-67f2-456b-9dad-8ab09e7fdd3b=winreg,1a176d14-3074-4876-8b4c-7e3b3623b2c6=winreg,8cbb3aee-d63f-487c-9bff-1d345844e7ca=winreg,4a0e516e-cad1-40e4-9be5-ab3219e6bae6=winreg
+  # Mapping of orgId to the minimum time between collections for the TEM real time job on persistent agents. 0 indicates no cooldown
+  endpoint.boss.orgid.tem_realtime.persistent.cooldown_minutes: DEFAULT=0
+  # Mapping of orgId to the minimum time between collections for the TEM real time job on dissolvable agents. 0 indicates no cooldown
+  endpoint.boss.orgid.tem_realtime.dissolvable.cooldown_minutes: DEFAULT=360
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Windows platforms. If true, the org must also be licensed for EA.
+  # Turned off for -- (Non-InsightVM customers should not run the updated tem_realtime if they are pinned to old agent versions)
+  # 88b25059-b599-464c-8a2e-6cff4611de18 - Texas DPS
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeartMedia
+  # d731581d-d563-4f05-a190-adfa987fa489 - Wilbur-Ellis Company
+  # e802fdf1-2766-45b1-805a-6ad61023542c - Esco Corporation
+  endpoint.boss.orgid.tem_realtime.windows.enabled: DEFAULT=true,88b25059-b599-464c-8a2e-6cff4611de18=false,01ba6a17-1516-4417-87da-8deff590dbb0=false,343b52d5-b015-4886-8952-c462a1bc6d2e=false,d731581d-d563-4f05-a190-adfa987fa489=false,e802fdf1-2766-45b1-805a-6ad61023542c=false,2c85d026-f7cc-4c49-a884-220b6ddae71f=false
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Darwin (OSX) platforms. If true, the org must also be licensed for EA.
+  # Turned off for -- (Non-InsightVM customers should not run the updated tem_realtime if they are pinned to old agent versions)
+  # 88b25059-b599-464c-8a2e-6cff4611de18 - Texas DPS
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeartMedia
+  # d731581d-d563-4f05-a190-adfa987fa489 - Wilbur-Ellis Company
+  # e802fdf1-2766-45b1-805a-6ad61023542c - Esco Corporation
+  endpoint.boss.orgid.tem_realtime.darwin.enabled: DEFAULT=true,88b25059-b599-464c-8a2e-6cff4611de18=false,01ba6a17-1516-4417-87da-8deff590dbb0=false,343b52d5-b015-4886-8952-c462a1bc6d2e=false,d731581d-d563-4f05-a190-adfa987fa489=false,e802fdf1-2766-45b1-805a-6ad61023542c=false,2c85d026-f7cc-4c49-a884-220b6ddae71f=false
+  # Mapping of organization ID's to whether or not the TEM real time job is enabled for Linux platforms. If true, the org must also be licensed for EA.
+  # Turned off for -- (Non-InsightVM customers should not run the updated tem_realtime if they are pinned to old agent versions)
+  # 88b25059-b599-464c-8a2e-6cff4611de18 - Texas DPS
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeartMedia
+  # d731581d-d563-4f05-a190-adfa987fa489 - Wilbur-Ellis Company
+  # ab563174-cb0c-4c5d-9c8e-ff6a8125469b - Opus Bank
+  # e802fdf1-2766-45b1-805a-6ad61023542c - Esco Corporation
+  endpoint.boss.orgid.tem_realtime.linux.enabled: DEFAULT=true,88b25059-b599-464c-8a2e-6cff4611de18=false,01ba6a17-1516-4417-87da-8deff590dbb0=false,343b52d5-b015-4886-8952-c462a1bc6d2e=false,d731581d-d563-4f05-a190-adfa987fa489=false,ab563174-cb0c-4c5d-9c8e-ff6a8125469b=false,e802fdf1-2766-45b1-805a-6ad61023542c=false,2c85d026-f7cc-4c49-a884-220b6ddae71f=false
+  # Mapping of organization ID's to whether or not the TEM real time job performs delta collection
+  endpoint.boss.orgid.tem_realtime.delta_collection: DEFAULT=true,343b52d5-b015-4886-8952-c462a1bc6d2e=false
+
+  #
+  # ui_realtime
+  #
+
+  # Mapping of organization ID's to whether or not the UI real time job performs delta collection for Windows platform
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC
+  # 175caba5-cc10-4898-bf91-861b6ca3de7e - Embry-Riddle Aeronautical University
+  # 76bda004-58cc-4a17-b5a2-738d3b061773 - Mr
+  # 506d6f7c-0dbf-4acf-bd41-f50a12c15d24 - QC Holdings Inc.
+  # cb403f92-4882-4e7b-8cfe-b6482428c368 - Blue Cross Blue Shield of Kansas City (BCBSKC)
+  endpoint.boss.orgid.ui_realtime.windows.enabled: DEFAULT=true,cf2a55ba-2024-4b23-994c-72f298e377ba=false,175caba5-cc10-4898-bf91-861b6ca3de7e=false,76bda004-58cc-4a17-b5a2-738d3b061773=false,506d6f7c-0dbf-4acf-bd41-f50a12c15d24=false,cb403f92-4882-4e7b-8cfe-b6482428c368=false
+  # Mapping of organization ID's to whether or not the UI real time job performs delta collection for Linux platform
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC
+  # 9d38a284-1130-45f8-b230-ca83c36c44dd - Market Force Information
+  # 175caba5-cc10-4898-bf91-861b6ca3de7e - Embry-Riddle Aeronautical University
+  # 76bda004-58cc-4a17-b5a2-738d3b061773 - Mr
+  # 506d6f7c-0dbf-4acf-bd41-f50a12c15d24 - QC Holdings Inc.
+  # cb403f92-4882-4e7b-8cfe-b6482428c368 - Blue Cross Blue Shield of Kansas City (BCBSKC)
+  endpoint.boss.orgid.ui_realtime.linux.enabled: DEFAULT=true,cf2a55ba-2024-4b23-994c-72f298e377ba=false,9d38a284-1130-45f8-b230-ca83c36c44dd=false,175caba5-cc10-4898-bf91-861b6ca3de7e=false,76bda004-58cc-4a17-b5a2-738d3b061773=false,506d6f7c-0dbf-4acf-bd41-f50a12c15d24=false,cb403f92-4882-4e7b-8cfe-b6482428c368=false
+  # Mapping of organization ID's to whether or not the UI real time job performs delta collection for Darwin platform
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC
+  # 175caba5-cc10-4898-bf91-861b6ca3de7e - Embry-Riddle Aeronautical University
+  # 76bda004-58cc-4a17-b5a2-738d3b061773 - Mr
+  # 506d6f7c-0dbf-4acf-bd41-f50a12c15d24 - QC Holdings Inc.
+  # cb403f92-4882-4e7b-8cfe-b6482428c368 - Blue Cross Blue Shield of Kansas City (BCBSKC)
+  endpoint.boss.orgid.ui_realtime.darwin.enabled: DEFAULT=true,cf2a55ba-2024-4b23-994c-72f298e377ba=false,175caba5-cc10-4898-bf91-861b6ca3de7e=false,76bda004-58cc-4a17-b5a2-738d3b061773=false,506d6f7c-0dbf-4acf-bd41-f50a12c15d24=false,cb403f92-4882-4e7b-8cfe-b6482428c368=false
+  # Mapping of organization IDs to whether or not the UI realtime is allowed when it's disabled
+  endpoint.boss.orgid.ui_realtime.invocation.allowed: DEFAULT=false
+  # Mapping of organization IDs to whether or not hash comparison is enabled
+  endpoint.boss.orgid.jobs.hash.comparison.enabled: DEFAULT=true
+  # Mapping of organization ID's to whether or not the network monitor job is enabled for Windows platform
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC
+  endpoint.boss.orgid.network_monitor.windows.enabled: DEFAULT=true,cf2a55ba-2024-4b23-994c-72f298e377ba=false
+
+  # Mapping of organization ID's to whether or not ad-hoc host invocations are enabled. NOTE: This does not stop currently running host invocations.
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC
+  endpoint.boss.orgid.host_invocations.enabled: DEFAULT=true,cf2a55ba-2024-4b23-994c-72f298e377ba=false
+  # Mapping of organization ID's to whether or not the Agents are running in restricted mode. Organizations running Agents in restricted mode will ensure no jobs are running, refuse incoming job requests, and prevent Agent updates.
+  endpoint.boss.orgid.agent.restricted: DEFAULT=false
+  # The EA orgs with endpoint cloud proxy enabled.
+  endpoint.ea.agent.ecp.org.ids: ''
+  # The mapping of organization ids to maximum concurrent updates allowed.
+  # Use 'DEFAULT' for organization ID to indicate default max concurrent updates.
+  # Use a number less than or equal to 0 to indicate no maximum.
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeart Media
+  # cc204705-6d75-413f-970b-b4be579392b0 - Vectren
+  # 2048b389-d852-4fa7-bd2b-9ef5144c9f31 - Happy State Bank - wants to limit agent rollout to 10% at a time
+  # 1dc143ce-43c8-43f2-8c66-1474c98e0fdd - Westfield Group - agent upgrades are slamming their bandwidth
+  # 73cac933-0fb3-4473-aa08-8044750cb63c - Simpson Thacher - want to try 100 at a time to start
+  # 686fbbbc-4166-45ac-8a41-ef5920624c17 - Milbank - wants to cut updates down to 100 at a time
+  # 97fdb636-c5f4-41ed-ad64-7c3029a6e21d - Hudson Valley Federal Credit Union
+  # e8fefed6-5993-45c4-9945-24f2d3b241e0 - Eastman Kodak Company
+  organizations.agents.updates.max.concurrent: DEFAULT=250,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=0,343b52d5-b015-4886-8952-c462a1bc6d2e=0,01ba6a17-1516-4417-87da-8deff590dbb0=2,cc204705-6d75-413f-970b-b4be579392b0=30,2048b389-d852-4fa7-bd2b-9ef5144c9f31=125,1dc143ce-43c8-43f2-8c66-1474c98e0fdd=100,73cac933-0fb3-4473-aa08-8044750cb63c=100,686fbbbc-4166-45ac-8a41-ef5920624c17=100,97fdb636-c5f4-41ed-ad64-7c3029a6e21d=10,e8fefed6-5993-45c4-9945-24f2d3b241e0=25
+  # List of organization ids whose agents should only communicate directly with the cloud
+  #
+  # 01ba6a17-1516-4417-87da-8deff590dbb0 - iHeart Media
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC US Holdings
+  # b1fc3a34-2002-40ab-937b-e83f89d6595e - Sinclair Broadcast Group, Inc
+  # 9c4d50ee-9140-4934-b1a4-97d4fef27437 - Mayo Clinic
+  # fc0fa623-f5ed-4b61-9b71-f2c294607d7e - Amcor
+  # f4c76b84-522e-43d7-b44d-e2bfb9ce7877 - Asurion
+  # cf641149-1300-4519-b9ad-5d326a157742 - Compassus
+  organizations.agents.cloud.only: 01ba6a17-1516-4417-87da-8deff590dbb0,cf2a55ba-2024-4b23-994c-72f298e377ba,b1fc3a34-2002-40ab-937b-e83f89d6595e,9c4d50ee-9140-4934-b1a4-97d4fef27437,fc0fa623-f5ed-4b61-9b71-f2c294607d7e,f4c76b84-522e-43d7-b44d-e2bfb9ce7877,cf641149-1300-4519-b9ad-5d326a157742
+  # Agent ID Reporting Service properties
+  # caf3c372-0c45-4869-875d-4f7b7ea608ec - Total Wine
+  # 673da8c9-e3c9-493f-b5b2-cee553aaf1ea - EPRI
+  # d9cff62e-ce84-4a26-9489-731f977a89b7 - Steamship
+  # 195c0be8-6aad-43a3-8e36-0d698f23393b - McKinsey
+  # a467a3dc-769f-46a6-bbfb-78e6cf5935ee - Steve Passino
+  # 8d2221dd-476a-4b1e-a38d-a087dbd05fd9 - WellStar Health System, Inc
+  # 0d47b584-0df6-4e3d-90d5-60c51d9f5106 - Indeed
+  # ad124788-02a7-4936-a1be-64667e7e0762 - Blackline
+  # 9f8aa3a8-edce-4e7b-83ae-d321d13bee35 - New York Central Mutual Fire Insurance Company
+  # 2c85d026-f7cc-4c49-a884-220b6ddae71f - Sutter Health - SI-8784
+  # 017c9cfa-c3db-4009-943f-70b4d64d1045 - Cardinal Health - SI-8804
+  # fbdc86ef-2b90-4804-89aa-93d8e71e5d8e - Truckstop
+  # 4d840001-efb5-4180-a1f3-9ab2200cbf7d - First Merchants Corporation
+  # 6fd88906-4fb3-430e-af6d-ee5e4bb7d60b - Nutter, Mcclennen & Fish, Llp - SI-8954
+  # d6ebfb13-a847-4483-b2c0-a217d4273e9e - Spirit AeroSystems
+  # 5f3cd82f-447c-4a66-9db5-74f10d254c87 - S & P Global Inc - SI-9134
+  # d228bd99-e3e1-40b3-bc98-9c5ca75a606c - Medtronic - SI-9141
+  # 6d395553-711e-445d-b2f0-a457f7646db6 - Medtronic - SI-9141
+  # a874d4b4-e12a-4072-84c6-598d0d4cfd13 - Medtronic - SI-9141
+  # fa981668-09f5-47a5-ba36-e0f29ee1415f - Medtronic - SI-9141
+  # 70f56c00-d49a-4bcb-82ea-182afb5b1629 - Whatcom Educational Credit Union - SI-9181
+  # 5c034d34-b104-4824-ae91-c571467c6627 - Nelnet Inc. - SI-9275
+  # a93f3cae-7b72-4bef-9611-30c540ea56b7 - Elevate Financial Services
+  # e18a24ef-d46b-4488-88ad-067ae8c1a9be - EPRI - SI-9339
+  # a05326f4-a731-412f-9b8d-6afdcfb4a4e8 - Cast & Crew - SI-9442
+  # d143dbeb-b28b-475e-8ad4-863612643301 - Kate Spade (Formerly Fifth and Pacific)
+  # bb009cef-b3a2-48a1-9da0-85e983a82541 - Nike Inc - SI-9592
+  # f665b9f3-c9fb-465e-8ddb-bbf0bb57ffb1 - Academy Sports & Outdoors, Ltd.
+  # 47d3ab89-a9ca-47ca-9e7e-ed5e261d1ef8 - Netgear
+  # ee9c4658-5fc1-4675-be32-c118b8710943 - FirstGroup America, Inc.
+  # e44aef78-1767-4c21-89d5-099fe5ba333f - LVS
+  # 7b99b887-081b-4934-88a9-ff9d50c01523 - Rapid7_Bane2
+  # 9408532b-abab-43ba-a613-adbd718d21ac - Patagonia
+  # 2bb4162a-b527-4fe0-8564-c5b1331e30cf - Landstar System Inc.
+  # 7b4968e2-e8dc-4632-b6ee-dea7e4521d5a - Dell 5
+  # 3b08c9e1-9c78-4331-adf1-a3b1e106568f - Dell 3
+  # ad35cec0-76b4-4c52-adb7-f77a0c4d102f - Dell 2
+  # a6580963-691e-4563-8c17-eb9a5bf5572f - Dell
+  # bf291ec1-9da1-4838-a24a-c4f5ee3c8274 - Dell 1
+  # be8ad6ff-1141-4865-8784-6789c0a4e83f - Central 1 Credit Union (BC)-63b3fc8b-832a-49cc-9104-0bf1b43a37ba
+  # f16a8455-0b94-4992-ab87-18b24a910b52 - eSolutions Inc
+  # 7e4207bc-6c2e-4df0-b99f-08aead7ed198 - Tower Engineering Professionals
+  # b603ee2a-3da1-4228-9609-1e1099b5aba8 - Heartland Dental
+  # 758a50c5-c46b-4e31-ba6b-cfa9a20f57ef - Virginia Commonwealth Bank
+  # 4c6609cd-0657-4eaa-a1b8-f1c37d55bfb7 - Meridian Trust Federal Credit Union
+  # 644c81fb-3c99-404d-89b5-7f07d51cda7a - Hologic
+  # cfb837b7-1c68-4746-af0f-2f3b728186bd - Lionbridge Technologies, Inc.
+  # bd849b8a-4a86-4384-8ce8-e5a5fd6369b9 - Intercontinental Hotels
+  endpoint.agent.id.reporting.service: DEFAULT=false,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=true,80d784e2-2a4d-4e82-819a-ea82a2319891=true,926758be-a793-4c1c-a638-41fb961d6b76=true,e2cef714-f5ae-4659-8138-76fd6a1d50d0=true,2d31e9ff-03e9-4687-b1b2-4741e13d9640=true,8e9cd37b-6a0f-4e59-9a6c-5cc981e806ee=true,9b8e8675-eafe-458e-9d87-15437a79d316=true,d6ede3a2-1cfb-4475-b0ae-52457a115d37=true,51bf6ab2-2aa4-4b97-b54f-9bb7d8b60d16=true,673da8c9-e3c9-493f-b5b2-cee553aaf1ea=true,13088dc8-5665-4d2d-bb1c-4310c8de1c3d=true,8ea49d43-93ae-41fd-b6e2-0a6029d3c487=true,330c018c-787a-41d7-bac6-3630395822d2=true,08485c3a-4a79-4173-842c-54b774c28b87=true,0d585a2c-9c3f-4166-9a99-91a27c3ed06e=true,5de30fda-cb37-4298-ba16-2011c1197b03=true,1e73e634-4847-4447-a8ab-a4710442eba7=true,0f96b1e9-a9af-4fb5-ba76-1e6b7f9e34e2=true,c1237152-7d0d-40cf-8d1b-bddac7ef08e3=true,75ff1021-8135-4ded-b1af-139917409445=true,509f8321-2aa1-4d7d-a822-7cd92c8e7bb7=true,432c9c6e-105c-4a23-b8cd-9b0be169a9cc=true,d6977018-42db-4471-b316-971c2958dbb0=true,ae7bbbd0-ba73-49c0-b162-8847966e0c52=true,da67139c-8a09-416b-acfe-276e38871073=true,99331bfa-0ca2-423f-8600-534d02ab9dae=true,caf3c372-0c45-4869-875d-4f7b7ea608ec=true,9533f0ad-a670-4128-969a-87b2820c6e82=true,d9cff62e-ce84-4a26-9489-731f977a89b7=true,195c0be8-6aad-43a3-8e36-0d698f23393b=true,a467a3dc-769f-46a6-bbfb-78e6cf5935ee=true,48582919-10c3-4189-971c-80bebfa1ab04=true,8d2221dd-476a-4b1e-a38d-a087dbd05fd9=true,0d47b584-0df6-4e3d-90d5-60c51d9f5106=true,ad124788-02a7-4936-a1be-64667e7e0762=true,9f8aa3a8-edce-4e7b-83ae-d321d13bee35=true,2c85d026-f7cc-4c49-a884-220b6ddae71f=true,017c9cfa-c3db-4009-943f-70b4d64d1045=true,fbdc86ef-2b90-4804-89aa-93d8e71e5d8e=true,4d840001-efb5-4180-a1f3-9ab2200cbf7d=true,6fd88906-4fb3-430e-af6d-ee5e4bb7d60b=true,1fdd4281-3249-4a9b-bc35-c4fa37b1496f=true,d6ebfb13-a847-4483-b2c0-a217d4273e9e=true,5f3cd82f-447c-4a66-9db5-74f10d254c87=true,d228bd99-e3e1-40b3-bc98-9c5ca75a606c=true,a874d4b4-e12a-4072-84c6-598d0d4cfd13=true,fa981668-09f5-47a5-ba36-e0f29ee1415f=true,70f56c00-d49a-4bcb-82ea-182afb5b1629=true,5c034d34-b104-4824-ae91-c571467c6627=true,a93f3cae-7b72-4bef-9611-30c540ea56b7=true,e18a24ef-d46b-4488-88ad-067ae8c1a9be=true,a05326f4-a731-412f-9b8d-6afdcfb4a4e8=true,d143dbeb-b28b-475e-8ad4-863612643301=true,bb009cef-b3a2-48a1-9da0-85e983a82541=true,f665b9f3-c9fb-465e-8ddb-bbf0bb57ffb1=true,47d3ab89-a9ca-47ca-9e7e-ed5e261d1ef8=true,ee9c4658-5fc1-4675-be32-c118b8710943=true,e44aef78-1767-4c21-89d5-099fe5ba333f=true,7b99b887-081b-4934-88a9-ff9d50c01523=true,9408532b-abab-43ba-a613-adbd718d21ac=true,2bb4162a-b527-4fe0-8564-c5b1331e30cf=true,7b4968e2-e8dc-4632-b6ee-dea7e4521d5a=true,3b08c9e1-9c78-4331-adf1-a3b1e106568f=true,ad35cec0-76b4-4c52-adb7-f77a0c4d102f=true,a6580963-691e-4563-8c17-eb9a5bf5572f=true,bf291ec1-9da1-4838-a24a-c4f5ee3c8274=true,be8ad6ff-1141-4865-8784-6789c0a4e83f=true,f16a8455-0b94-4992-ab87-18b24a910b52=true,7e4207bc-6c2e-4df0-b99f-08aead7ed198=true,b603ee2a-3da1-4228-9609-1e1099b5aba8=true,758a50c5-c46b-4e31-ba6b-cfa9a20f57ef=true,4c6609cd-0657-4eaa-a1b8-f1c37d55bfb7=true,644c81fb-3c99-404d-89b5-7f07d51cda7a=true,cfb837b7-1c68-4746-af0f-2f3b728186bd=true,bd849b8a-4a86-4384-8ce8-e5a5fd6369b9=true
+  endpoint.agent.id.reporting.service.port: DEFAULT=31400
+  endpoint.agent.id.reporting.service.ip.whitelist: DEFAULT=any
+
+  #
+  # le_realtime
+  #
+
+  # Mapping of organization ids to enable raw log realtime job
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - DCA - Testbed
+  endpoint.boss.orgid.le_realtime.linux.enabled: DEFAULT=true
+  endpoint.boss.orgid.le_realtime.windows.enabled: DEFAULT=true
+  endpoint.boss.orgid.le_realtime.darwin.enabled: DEFAULT=true
+
+  # name of the organization app sqs queue
+  organization.sqs.queue.name: us-east-1-razor-prod-1-platform-organization-app-endpointBossApp
+  # names of agent ids to verbosely log their job configs. Typo is necessary as thats how it is in the code...
+  # Noble Energy - Domain Controller - a33eee188b6912ae0c8274886450dadd
+  endpoint.boaa.agent.verbose.job.config.logging.host.ids: a8be4d7f26a1166c8f9ee269c871c26b,4b60ab03573014b55bdbef0a9822c4e6,a33eee188b6912ae0c8274886450dadd
+  # Mapping of organization ids (key) to enable network range filtering feature ('true'/'false')
+  # 686a33ec-88b9-4f84-bddf-2a1fb0fecb85 - DCA Internal
+  # e2cef714-f5ae-4659-8138-76fd6a1d50d0 - Rapid7
+  endpoint.agent.network.range.filtering: DEFAULT=false,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=true,e2cef714-f5ae-4659-8138-76fd6a1d50d0=true
+
+  # Whether or not the Agent will consider system configured proxies when connecting to the platform
+  # e89b896d-39e6-4b82-bd18-7ed5c126e654 - TW Estates US
+  # 986ec15f-84d0-42fe-9041-af1871232714 - INWOOD NATIONAL BANK - (SF Case 00189237)
+  endpoint.boss.orgid.agent.proxy.enabled: DEFAULT=true,e89b896d-39e6-4b82-bd18-7ed5c126e654=false,986ec15f-84d0-42fe-9041-af1871232714=false
+
+  #
+  # ATTRIBUTED_BEACON thread pools
+  #
+
+  # Number of threads for fetching attributed beacons payload notify events
+  endpoint.attributed.beacon.max.fetcher.threads: 1
+  # Number of threads for processing attributed beacons payload notify events
+  endpoint.attributed.beacon.max.consumer.threads: 1
+  # Number of threads for attributed beacons management threads
+  endpoint.attributed.beacon.max.management.threads: 1
+  # Number of threads for attributed beacons vibisility timeout updaters
+  endpoint.attributed.beacon.max.visibility.updater.threads: 1
+  # The sampling probability (0-1.0f) for processing attributed beacon for persistent agent
+  endpoint.boss.host.attributed.beacon.persistent.agent.sample.probability: 0.0f
+
+  #
+  # ATTRIBUTED_BEACON retry thread pools
+  #
+
+  # Number of threads for fetching attributed beacons payload notify events
+  endpoint.attributed.beacon.max.retry.fetcher.threads: 1
+  # Number of threads for processing attributed beaconspayload notify events
+  endpoint.attributed.beacon.max.retry.consumer.threads: 1
+  # Number of threads for attributed beacons management threads
+  endpoint.attributed.beacon.max.retry.management.threads: 1
+  # Number of threads for attributed beacons vibisility timeout updaters
+  endpoint.attributed.beacon.max.retry.visibility.updater.threads: 1
+
+
+  #
+  # FILE_UPLOAD_COMPLETE thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.file.upload.complete.max.fetcher.threads: 1
+  # Number of threads for processing raw blob payload notify events
+  endpoint.file.upload.complete.max.consumer.threads: 4
+  # Number of threads for blob management threads
+  endpoint.file.upload.complete.max.management.threads: 1
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.file.upload.complete.max.visibility.updater.threads: 1
+
+  #
+  # JOB_STATUS thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.job.status.max.fetcher.threads: 4
+  # Number of threads for processing raw blob payload notify events
+  endpoint.job.status.max.consumer.threads: 20
+  # Number of threads for blob management threads
+  endpoint.job.status.max.management.threads: 4
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.job.status.max.visibility.updater.threads: 4
+
+  #
+  # JOB_STATUS retry thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.job.status.max.retry.fetcher.threads: 1
+  # Number of threads for processing raw blob payload notify events
+  endpoint.job.status.max.retry.consumer.threads: 1
+  # Number of threads for blob management threads
+  endpoint.job.status.max.retry.management.threads: 1
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.job.status.max.retry.visibility.updater.threads: 1
+
+  #
+  # BEACON_COMMANDS_REQUEST thread pools
+  #
+
+  # Number of threads for fetching raw blob payload notify events
+  endpoint.beacon.commands.max.fetcher.threads: 4
+  # Number of threads for processing raw blob payload notify events
+  endpoint.beacon.commands.max.consumer.threads: 40
+  # Number of threads for blob management threads
+  endpoint.beacon.commands.max.management.threads: 4
+  # Number of threads for blob vibisility timeout updaters
+  endpoint.beacon.commands.max.visibility.updater.threads: 4
+  # The maximum batch time for batching SQS API calls
+  endpoint.beacon.commands.max.batch.time.ms: 50
+  # The sampling probability (0-1.0f) for processing beacon command
+  endpoint.boss.host.beacon.command.sample.probability: 1.0f
+  # The max age of beacon command that should be processed by e-b-a
+  endpoint.boss.host.beacon.command.should.process.age.seconds: 70
+
+
+  # Api Token for accessing platform-public-api-app over Kong.
+  platform-public-api-app.kong.api.token: c915fa89-1a83-466b-9816-9fb439ea1727
+
+  # Cutoff prop for old beacons by org. Use DEFAULT as the key for the default value or specify an org id to overide it for
+  # a particular org.
+  # 0cd77ed0-f76a-4c27-9e03-9dca1c8ccfd7 - freedomalliance_wast401 - 20180312 UI-7886
+  # 432c9c6e-105c-4a23-b8cd-9b0be169a9cc - TriNet Group, INC. - 20180312 UI-7886
+  # cf2a55ba-2024-4b23-994c-72f298e377ba - TNC US Holdings, Inc. - 20180312 UI-7886
+  # 5f3cd82f-447c-4a66-9db5-74f10d254c87 - S&P Global-e3902e81-dcc3-41c1-975e-3cdf334f7133 - 20180312 UI-7886
+  org.id.max.beacon.age.seconds.map: 0cd77ed0-f76a-4c27-9e03-9dca1c8ccfd7=300,432c9c6e-105c-4a23-b8cd-9b0be169a9cc=300,cf2a55ba-2024-4b23-994c-72f298e377ba=300,5f3cd82f-447c-4a66-9db5-74f10d254c87=300
+
+  # Cron expression for HostInvocationTimeoutJob - run at 20 and 50 minute mark every hour.
+  endpoint.boss.hostinvocation.timeout.cron.exp: 0 20 * * * ?
+
+  # Number of threads to devote to processing endpointboss scheduled jobs
+  # Check connection pool usage before increasing this!
+  endpoint.boss.scheduler.thread.count: 20
+
+  # Whether to send emails at the completion of process memory analysis jobs.
+  endpoint.boss.process.analysis.email.enabled: false
+
+  # host ids to turn on verbose beacon commands logging
+  #
+  # c1a14e6b870fd8557e83945551a25017 - @rajanp's test VM for Akeely Dev Test org
+  # 1115229a90bfb4f85590cfc944439b9f - The Marcus Corporation failed unquarantine asset
+  # x407b945069f077ab523ba389fb148j8 - @jmaredia's VM in DCA Test Org
+  hostid.verbose.beacon.commands.logging: 4240d64b9e48599bc489dee67d817778,0663d9e616d56459d7b7021813747cd7,c1a14e6b870fd8557e83945551a25017,1115229a90bfb4f85590cfc944439b9f,x407b945069f077ab523ba389fb148j8,1e53f3d3d5f9b4b6aa7b9f13a8c630b5,07496bdb7e2135b7ff0dbf7fadbffe09,44318964543827658687694832648761,fbca603c83822cde72a634ee3ec3da8a
+  endpoint.boss.process.attributed.beacon.enabled: true
+  # When running ProvisioningService.migrate(), do not check if migrations exist.
+  provisioning.migrate.force: false
+
+  # Mapping of org id to whether or not legacy Agents (1.x) will use p2p to share updates locally with other 1.x Agents.
+  endpoint.boss.orgid.agent.update.localized.enabled: DEFAULT=true,343b52d5-b015-4886-8952-c462a1bc6d2e=false
+
+  #
+  # ComponentConfigurationService related properties
+  #
+
+  # The component config service url
+  component-config-service.url: https://class3.ingress-prod-1.platform-ingress.r7ops.com/ccs/
+  # Whether or not the EBA should merge AgentApp configuration from CCS
+  # DCA - 686a33ec-88b9-4f84-bddf-2a1fb0fecb85
+  # ITEST - 343b52d5-b015-4886-8952-c462a1bc6d2e
+  merge.agentapp.configuration.from.ccs.enabled: DEFAULT=true,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=true,343b52d5-b015-4886-8952-c462a1bc6d2e=true
+
+  # Whether or not the CCS beacon is enable
+  endpoint.boss.orgid.ccs.beacon.enabled: "
+    DEFAULT=true,\
+    "
+
+  # CCS beacon interval
+  # Kasra test org - 73605cd5-d75d-45eb-9726-4ee8ce3d0da5
+  endpoint.boss.orgid.ccs.beacon.interval: DEFAULT=1200,73605cd5-d75d-45eb-9726-4ee8ce3d0da5=30
+
+  # DB schema migration configuration options
+  provisioning.migrate.validation.enabled: true
+  provisioning.repair.before.migrate: false
+
+  # Whether or not we process "job.status.failed" events for quarantine jobs.
+  # Kasra test org - 73605cd5-d75d-45eb-9726-4ee8ce3d0da5
+  endpoint.boss.process.quarantine.job.status.failed.enabled: DEFAULT=true,73605cd5-d75d-45eb-9726-4ee8ce3d0da5=true
