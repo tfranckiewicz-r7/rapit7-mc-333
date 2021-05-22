@@ -43,7 +43,7 @@ properties:
   #     \_____/ /
   #       \____/
   #
-  endpoint.boss.orgid.agentversion.mapping: DEFAULT=11620076296,c039f873-3c1d-4e22-97df-15cbc8322796=1539197970,d6e760ce-d1ef-4a3e-89aa-ec2750e770fb=1554913774
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296,c039f873-3c1d-4e22-97df-15cbc8322796=1539197970,d6e760ce-d1ef-4a3e-89aa-ec2750e770fb=1554913774
   # Redis cache TTL for last full scan time in hours.
   endpoint.boss.redis.full.scan.time.ttl: 24
   # Hostname of this service's redis server.
