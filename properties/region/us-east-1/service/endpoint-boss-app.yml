@@ -21,7 +21,7 @@ properties:
   # Beacon Interval in Seconds
   endpoint.orgid.agent.beacon.interval: DEFAULT=30,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=60
   # Mapping of organization ID's to endpoint scan agent versions. This version must be compatible with the endpoint scanner data source (an installer build).
-  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1620076296,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=1620076296
+  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1621568114,686a33ec-88b9-4f84-bddf-2a1fb0fecb85=1620076296
   # Mapping of organization ID's to endpoint agent versions. Use 'DEFAULT' for organization ID to indicate default version.
   # e2cef714-f5ae-4659-8138-76fd6a1d50d0 - R7
   # 343b52d5-b015-4886-8952-c462a1bc6d2e - Internal Integration Testing
@@ -110,7 +110,7 @@ properties:
   #     \_____/ /
   #       \____/
   #
-  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296,343b52d5-b015-4886-8952-c462a1bc6d2e=1554913774,01ba6a17-1516-4417-87da-8deff590dbb0=1478127134,2c9a191d-0b61-4167-a23d-c4b4cd91028a=1538704800,686fbbbc-4166-45ac-8a41-ef5920624c17=1544630321,88b25059-b599-464c-8a2e-6cff4611de18=1478127134,9f8aa3a8-edce-4e7b-83ae-d321deplace13bee35=1509978973,b795b7c9-5f40-4981-b481-f68bbc712977=1550188700,f7de4a94-bbaa-4817-b493-56a2aa0e1ddf=1507053283,0c2e5b57-1601-4905-b4fd-3eaaaa4d8c8c=1558719734,5c388fc6-6646-4aa5-92be-594f58fcfdfe=1548357692,851096de-42b2-430b-95a3-8d6b9e73baea=1559328709,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1563904488
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1621568114,343b52d5-b015-4886-8952-c462a1bc6d2e=1554913774,01ba6a17-1516-4417-87da-8deff590dbb0=1478127134,2c9a191d-0b61-4167-a23d-c4b4cd91028a=1538704800,686fbbbc-4166-45ac-8a41-ef5920624c17=1544630321,88b25059-b599-464c-8a2e-6cff4611de18=1478127134,9f8aa3a8-edce-4e7b-83ae-d321deplace13bee35=1509978973,b795b7c9-5f40-4981-b481-f68bbc712977=1550188700,f7de4a94-bbaa-4817-b493-56a2aa0e1ddf=1507053283,0c2e5b57-1601-4905-b4fd-3eaaaa4d8c8c=1558719734,5c388fc6-6646-4aa5-92be-594f58fcfdfe=1548357692,851096de-42b2-430b-95a3-8d6b9e73baea=1559328709,765c779d-c783-44f0-b1a0-c6c54ee6f4d0=1563904488
   # Mapping of host ID's to endpoint agent versions. This overrides any organization ID setting. 'DEFAULT' is NOT supported by this property.
   # 75dac975f22b16e9fd9f49607dbb9a05 - Casey's (securityteamlab.caseys.local)
   # ec01262abf8d73913af540eeb44ef424 - Capital District Physicians' Health Plan Inc. (XASDSK001T.int.cdphp.com)
