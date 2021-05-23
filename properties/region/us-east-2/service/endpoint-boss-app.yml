@@ -17,7 +17,7 @@ properties:
   # Number of seconds after which a beacon message would represent healthy status of a host
   endpoint.boss.healthy.beacon.threshold: 1800
   # Mapping of organization ID's to endpoint scan agent versions. This version must be compatible with the endpoint scanner data source (an installer build).
-  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1620076296
+  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1621353659
   # Mapping of organization ID's to endpoint agent versions. Use 'DEFAULT' for organization ID to indicate default version.
   # d6e760ce-d1ef-4a3e-89aa-ec2750e770fb - Internal Integration Testing
   # 63408c42-090f-41bd-84f5-dbf5fdc8b17e - Trogdor team Internal test organization
@@ -44,7 +44,7 @@ properties:
   #       \____/
   #
   #TODO: Change once set
-  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1621353659
   # Redis cache TTL for last full scan time in hours.
   endpoint.boss.redis.full.scan.time.ttl: 24
   # Hostname of this service's redis server.
