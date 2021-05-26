@@ -214,7 +214,7 @@ pipeline {
                     print "Wait for mergeable"
                     waitPR(prAPIUrl, 60, gitHubApiToken)
                     print "Merge"
-                    //mergePR(prAPIUrl + "/merge", gitHubApiToken)
+                    mergePR(prAPIUrl + "/merge", gitHubApiToken)
                 }
             }
         }
@@ -234,6 +234,13 @@ pipeline {
                 }
             }
         }
+        stage("Delete merged branch") {
+            steps {
+                sh "git checkout ${releaseBranchName}"
+                sh "git push origin --delete ${releaseBranchTmp}"
+                sh "git branch -D ${releaseBranchTmp}"
+            }
+        }
         stage('Build release') {
             steps {
                 build job: releaseJobName, parameters: [
@@ -249,42 +256,40 @@ pipeline {
             script {
                 echo "Build failed. Reverting"
 
-                try {
+                if (jiraEndpointProjectId != "") {
                     unreleaseJiraVersion(
                         jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointVersionId, jiraEndpointProjectId
                     )
-                } catch (err) {
-                    echo "Unable to unrelease Endpoint Jira version"
                 }
-                
-                try {
+
+                if (jiraDcaProjectId != "") {
                     unreleaseJiraVersion(
                         jiraRestApiUrl, jiraApiCredentialsId, jiraDcaVersionId, jiraDcaProjectId
                     )
-                } catch (err) {
-                    echo "Unable to unrelease Endpoint Jira version"
                 }
 
-                try {
-                    sh "git push origin --delete ${releaseBranchTmp}"
-                } catch (err) {
-                    echo "Unable to delete remote ${releaseBranchTmp} branch"
+                if (releaseBranchTmp != "") {
+                    releaseBranchTmpExists = sh(script:"git show-ref ${releaseBranchTmp}", returnStdout: true).trim().isNotEmpty()
+                    
+                    if (releaseBranchTmpExists) {
+                        sh "git push origin --delete ${releaseBranchTmp}"
+                    }
                 }
 
-                try {
+                if (createdReleaseId != "") {
                     deleteGitHubRelease(
                         "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
                         gitHubApiToken,
                         createdReleaseId
                     )
-                } catch (err) {
-                    echo "Unable to delete GitHub release with id '${createdReleaseId}'"
                 }
 
-                try {
-                    sh "git push --delete origin ${tagVersion}"
-                } catch (err) {
-                    echo "Unable to delete tag with name '${tagVersion}'"
+                if (tagVersion != "")
+                    tagExists = sh(script:"git show-ref ${tagVersion}", returnStdout: true).trim().isNotEmpty()
+    
+                    if (tagExists) {
+                        sh "git push origin --delete ${tagVersion}"
+                    }
                 }
             }
         }
