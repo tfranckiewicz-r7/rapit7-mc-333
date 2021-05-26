@@ -6,7 +6,7 @@ def pyForensicsAgentRepo = "PyForensicsAgent"
 def razorPropertiesRepo = "razor-properties"
 def repoOwner = "tfranckiewicz-r7"
 def githubCredentialsID = 'jenkins-tfranckiewicz-mc-333'
-def gitHubApiToken = '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'
+def gitHubApiToken = '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'
 def releaseJobName = 'py-forensics-agent-installer-release-mc-333'
 
 def jiraSubDomain = "it-bajt"
@@ -27,12 +27,12 @@ def propertiesFiles = [
 // Do not modify
 def pyForensicsAgentRepoUrl = "https://github.com/${repoOwner}/${pyForensicsAgentRepo}"
 withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
-    pyForensicsAgentRepoUrl = "https://${env.gitCredUsername}:${env.gitCredPass}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
+    pyForensicsAgentRepoUrl = "https://${env.gitCredUsername}:${gitHubApiToken}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
 }
 
 def razorPropertiesRepoUrl = "https://github.com/${repoOwner}/${razorPropertiesRepo}"
 withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
-    razorPropertiesRepoUrl = "https://${env.gitCredUsername}:${env.gitCredPass}@github.com/${repoOwner}/${razorPropertiesRepo}"
+    razorPropertiesRepoUrl = "https://${env.gitCredUsername}:${gitHubApiToken}@github.com/${repoOwner}/${razorPropertiesRepo}"
 }
 
 def gitHubApiUrl = "https://api.github.com"
@@ -44,7 +44,8 @@ def releaseTitle = ""
 def semanticVersion = ""
 def epochVersion = ""
 def tagVersion = ""
-def createdReleaseId = null
+def createdReleaseId = ""
+def releaseBranchTmpPushed = false
 
 def jiraRestApiUrl = "https://'${jiraSubDomain}'.atlassian.net/rest/api/3"
 def jiraVersionName = ""
@@ -136,7 +137,7 @@ pipeline {
                     )
 
                     jiraEndpointVersionId = jiraEndpointVersion.id
-                    jiraEndpointProjectId = jiraEndpointVersion.jiraProjectId
+                    jiraEndpointProjectId = jiraEndpointVersion.projectId
                 }
             }
         }
@@ -148,7 +149,7 @@ pipeline {
                     )
 
                     jiraDcaVersionId = jiraDcaVersion.id
-                    jiraDcaProjectId = jiraDcaVersion.jiraProjectId
+                    jiraDcaProjectId = jiraDcaVersion.projectId
                 }
             }
         }
@@ -196,6 +197,7 @@ pipeline {
                     sh "git add ."
                     sh "git commit -m 'Release ${semanticVersion}'"
                     sh "git push origin ${releaseBranchTmp}"
+                    releaseBranchTmpPushed = true
                 }
             }
         }
@@ -268,12 +270,8 @@ pipeline {
                     )
                 }
 
-                if (releaseBranchTmp != "") {
-                    releaseBranchTmpExists = sh(script:"git show-ref ${releaseBranchTmp}", returnStdout: true).trim().isNotEmpty()
-                    
-                    if (releaseBranchTmpExists) {
-                        sh "git push origin --delete ${releaseBranchTmp}"
-                    }
+                if (releaseBranchTmpPushed) {
+                    sh "git push origin --delete ${releaseBranchTmp}"
                 }
 
                 if (createdReleaseId != "") {
@@ -282,14 +280,8 @@ pipeline {
                         gitHubApiToken,
                         createdReleaseId
                     )
-                }
 
-                if (tagVersion != "")
-                    tagExists = sh(script:"git show-ref ${tagVersion}", returnStdout: true).trim().isNotEmpty()
-    
-                    if (tagExists) {
-                        sh "git push origin --delete ${tagVersion}"
-                    }
+                    sh "git push origin --delete ${tagVersion}"
                 }
             }
         }
@@ -412,7 +404,7 @@ def callGitHubApi(method, url, apiToken, data = null) {
         curlData = "--data '${jsonData}'"
     }
 
-    response = sh(script: "curl -s --fail -X '${method}' '${url}' ${headers} ${curlData}", returnStdout: true)
+    response = sh(script: "curl -s -X '${method}' '${url}' ${headers} ${curlData}", returnStdout: true)
 
     if (response == null) {
         return null
