@@ -1,0 +1,502 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+// To define
+def pyForensicsAgentRepo = "PyForensicsAgent"
+def razorPropertiesRepo = "razor-properties"
+def repoOwner = "tfranckiewicz-r7"
+def githubCredentialsID = 'jenkins-tfranckiewicz-mc-333'
+def gitHubApiToken = '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'
+def releaseJobName = 'py-forensics-agent-installer-release-mc-333'
+
+def jiraSubDomain = "it-bajt"
+def jiraEndpointProjectKey = "DESK"
+def jiraDcaProjectKey = "BIRTH"
+def jiraApiCredentialsId = "franckiewicz.tomasz@gmail.com:eiqjsxJgoAzBEO0KnCCa14F7"
+
+def propertiesFiles = [
+    "properties/region/ap-northeast-1/service/endpoint-boss-app.yml",
+    "properties/region/ap-southeast-2/service/endpoint-boss-app.yml",
+    "properties/region/ca-central-1/service/endpoint-boss-app.yml",
+    "properties/region/eu-central-1/service/endpoint-boss-app.yml",
+    "properties/region/us-east-1/service/endpoint-boss-app.yml",
+    "properties/region/us-east-2/service/endpoint-boss-app.yml",
+    "properties/region/us-west-2/service/endpoint-boss-app.yml"
+]
+
+// Do not modify
+def pyForensicsAgentRepoUrl = "https://github.com/${repoOwner}/${pyForensicsAgentRepo}"
+withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
+    pyForensicsAgentRepoUrl = "https://${env.gitCredUsername}:${env.gitCredPass}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
+}
+
+def razorPropertiesRepoUrl = "https://github.com/${repoOwner}/${razorPropertiesRepo}"
+withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
+    razorPropertiesRepoUrl = "https://${env.gitCredUsername}:${env.gitCredPass}@github.com/${repoOwner}/${razorPropertiesRepo}"
+}
+
+def gitHubApiUrl = "https://api.github.com"
+
+def latestReleaseEpochVersion = ""
+def releaseBranchName = ""
+def releaseBranchTmp = ""
+def releaseTitle = ""
+def semanticVersion = ""
+def epochVersion = ""
+def tagVersion = ""
+def createdReleaseId = null
+
+def jiraRestApiUrl = "https://'${jiraSubDomain}'.atlassian.net/rest/api/3"
+def jiraVersionName = ""
+def jiraEndpointVersionId = ""
+def jiraEndpointProjectId = ""
+def jiraDcaVersionId = ""
+def jiraDcaProjectId = ""
+
+pipeline {
+    agent any
+    stages {
+        stage('Delete workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+        stage('Set config') {
+            steps {
+                sh 'git config --global credential.helper cache'
+                sh 'git config --global push.default simple'
+                sh 'git config --global user.email "Tomasz_Franckiewicz@rapid7.com"'
+                sh 'git config --global user.name "Tomasz Franckiewicz"'
+            }
+        }
+        stage('Set latestReleaseEpochVersion') {
+            steps {
+                script {
+                    def tagName = findLatestReleaseTagName(
+                        "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
+                        gitHubApiToken
+                    )
+
+                    latestReleaseEpochVersion = tagName.split("_").last()
+                }
+            }
+        }
+        stage('Checkout PyForensicsAgent repository') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[url: "${pyForensicsAgentRepoUrl}"]],
+                    extensions: [
+                        [$class: 'CloneOption', noTags: true, reference: '', shallow: true],
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'LocalBranch', localBranch: 'master']
+                    ],
+                    submoduleCfg: []
+                ])
+            }
+        }
+        stage('Checkout latest release branch') {
+            steps {
+                script {
+                    releaseBranchName = sh(script:"git branch -r | grep 'release_' | tail -1", returnStdout: true).trim().split("/").last()
+
+                    sh "git checkout ${releaseBranchName}"
+                }
+            }
+        }
+        stage('Set semantic, epoch and Jira versions') {
+            steps {
+                script {
+                    def currentVersionNumbers = getCurrentVersionNumbers()
+
+                    def majorVersion = currentVersionNumbers["majorVersion"]
+                    def minorVersion = currentVersionNumbers["minorVersion"]
+                    def patchVersion = currentVersionNumbers["patchVersion"]
+                    def buildVersion = currentVersionNumbers["buildVersion"]
+
+                    epochVersion = getCurrentEpochVersion()
+                    releaseBranchTmp = "${releaseBranchName}_${epochVersion}"
+
+                    if (!buildVersion.isEmpty()) {
+                        semanticVersion = "${majorVersion}.${minorVersion}.${patchVersion}.${buildVersion}"
+                    } else {
+                        semanticVersion = "${majorVersion}.${minorVersion}.${patchVersion}"
+                    }
+                    
+                    jiraVersionName = "Agent-${majorVersion}.${minorVersion}.${patchVersion}"
+                }
+            }
+        }
+        stage('Find and validate Jira Endpoint version') {
+            steps {
+                script {
+                    def jiraEndpointVersion = findAndValidateJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointProjectKey, jiraVersionName
+                    )
+
+                    jiraEndpointVersionId = jiraEndpointVersion.id
+                    jiraEndpointProjectId = jiraEndpointVersion.jiraProjectId
+                }
+            }
+        }
+        stage('Find and validate Jira DCA version') {
+            steps {
+                script {
+                    def jiraDcaVersion = findAndValidateJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaProjectKey, jiraVersionName
+                    )
+
+                    jiraDcaVersionId = jiraDcaVersion.id
+                    jiraDcaProjectId = jiraDcaVersion.jiraProjectId
+                }
+            }
+        }
+        stage('Release Jira versions') {
+            steps {
+                script {
+                    releaseJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointVersionId, jiraEndpointProjectId
+                    )
+
+                    releaseJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaVersionId, jiraDcaProjectId
+                    )
+                }
+            }
+        }
+        stage('Checkout razor-properties repository') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[url: "${razorPropertiesRepoUrl}"]],
+                    extensions: [
+                        [$class: 'CloneOption', noTags: true, reference: '', shallow: true],
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'LocalBranch', localBranch: 'master']
+                    ],
+                    submoduleCfg: []
+                ])
+            }
+        }
+        stage('Update epochVersion in yml files') {
+            steps {
+                script {
+                    propertiesFiles.each {
+                        sh "sed 's/DEFAULT=${latestReleaseEpochVersion}/DEFAULT=${epochVersion}/g' -i $it"
+                    }
+                }
+            }
+        }
+        stage('Commit and push updated yml files') {
+            steps {
+                script {
+                    sh "git checkout -b ${releaseBranchTmp}"
+                    sh "git add ."
+                    sh "git commit -m 'Release ${semanticVersion}'"
+                    sh "git push origin ${releaseBranchTmp}"
+                }
+            }
+        }
+        stage("Create PR and merge to master") {
+            steps {
+                script {
+                    print "Create PR"
+                    def number = createPR(
+                        "${gitHubApiUrl}/repos/${repoOwner}/${razorPropertiesRepo}",
+                        gitHubApiToken,
+                        repoOwner,
+                        semanticVersion,
+                        releaseBranchTmp
+                    )
+                    prAPIUrl = "${gitHubApiUrl}/repos/${repoOwner}/${razorPropertiesRepo}/pulls/${number}"
+                    print "Wait for mergeable"
+                    waitPR(prAPIUrl, 60, gitHubApiToken)
+                    print "Merge"
+                    //mergePR(prAPIUrl + "/merge", gitHubApiToken)
+                }
+            }
+        }
+        stage('Create github release') {
+            steps {
+                script {
+                    releaseTitle = "Agent Release ${semanticVersion}"
+                    tagVersion = "v${majorVersion}.${minorVersion}.${patchVersion}.${buildVersion}_${epochVersion}"
+    
+                    createdReleaseId = createGitHubRelease(
+                        "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
+                        gitHubApiToken,
+                        tagVersion,
+                        releaseTitle,
+                        releaseBranchName
+                    )
+                }
+            }
+        }
+        stage('Build release') {
+            steps {
+                build job: releaseJobName, parameters: [
+                    string(name: 'RELEASE_GA_VERSION', value: epochVersion),
+                    string(name: 'RELEASE_GA_SEMANTIC_VERSION', value: semanticVersion),
+                    booleanParam(name: 'UPLOAD_PROD_LATEST_S3', value: true)
+                ]
+            }
+        }
+    }
+    post {
+        failure {
+            script {
+                echo "Build failed. Reverting"
+
+                try {
+                    unreleaseJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointVersionId, jiraEndpointProjectId
+                    )
+                } catch (err) {
+                    echo "Unable to unrelease Endpoint Jira version"
+                }
+                
+                try {
+                    unreleaseJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaVersionId, jiraDcaProjectId
+                    )
+                } catch (err) {
+                    echo "Unable to unrelease Endpoint Jira version"
+                }
+
+                try {
+                    sh "git push origin --delete ${releaseBranchTmp}"
+                } catch (err) {
+                    echo "Unable to delete remote ${releaseBranchTmp} branch"
+                }
+
+                try {
+                    deleteGitHubRelease(
+                        "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
+                        gitHubApiToken,
+                        createdReleaseId
+                    )
+                } catch (err) {
+                    echo "Unable to delete GitHub release with id '${createdReleaseId}'"
+                }
+
+                try {
+                    sh "git push --delete origin ${tagVersion}"
+                } catch (err) {
+                    echo "Unable to delete tag with name '${tagVersion}'"
+                }
+            }
+        }
+    }
+}
+
+def getCurrentVersionNumbers() {
+    def currentVersion = sh(script:"grep '__semantic_version__' agent/__init__.py", returnStdout: true).split("=")[1].trim().replaceAll("'", "")
+
+    semanticVersionSplit = currentVersion.split("\\.")
+    majorVersion = semanticVersionSplit[0]
+    minorVersion = semanticVersionSplit[1]
+    patchVersion = semanticVersionSplit[2]
+    buildVersion = semanticVersionSplit[3]
+
+    return [
+        "majorVersion": majorVersion,
+        "minorVersion": minorVersion,
+        "patchVersion": patchVersion,
+        "buildVersion": buildVersion
+    ]
+}
+
+def getCurrentEpochVersion() {
+    return sh(script:"grep '__version__' agent/__init__.py", returnStdout: true).split("=")[1].trim().replaceAll("'", "")
+}
+
+def createGitHubRelease(gitHubApiUrl, gitHubApiToken, tagVersion, releaseTitle, releaseBranchName) {
+    def release = callGitHubApi(
+        "POST",
+        "${gitHubApiUrl}/releases",
+        gitHubApiToken,
+        [
+            "tag_name": tagVersion,
+            "target_commitish": releaseBranchName,
+            "name": releaseTitle,
+        ]
+    )
+    
+    return release.id
+}
+
+def deleteGitHubRelease(gitHubApiUrl, gitHubApiToken, releaseId) {
+    callGitHubApi(
+        "DELETE",
+        "${gitHubApiUrl}/releases/${releaseId}",
+        gitHubApiToken
+    )
+}
+
+def findLatestReleaseTagName(gitHubApiUrl, gitHubApiToken) {
+    def release = callGitHubApi(
+        "GET",
+        "${gitHubApiUrl}/releases/latest",
+        gitHubApiToken
+    )
+    
+    return release.tag_name
+}
+
+def createPR(gitHubApiUrl, gitHubApiToken, repoOwner, semanticVersion, releaseBranchTmp) {
+    def response = callGitHubApi(
+        "POST",
+        "${gitHubApiUrl}/pulls",
+        gitHubApiToken,
+        [
+            "title": "Agent Release: ${semanticVersion}",
+            "head": "${repoOwner}:${releaseBranchTmp}",
+            "base": "master"
+        ]
+    )
+
+    return response.number
+}
+
+def waitPR(prAPIUrl, waitTimeSec, githubAPIToken) {
+    def mergeable = false
+    while (waitTimeSec > 0) {
+        print "Waiting for PR to be mergeable: ${prAPIUrl}."
+        def response = callGitHubApi(
+            "GET",
+            prAPIUrl,
+            githubAPIToken
+        )
+        mergeable = response.mergeable
+        if (mergeable == null) {
+            print "Github still creating PR. Still waiting"
+            waitTimeSec--
+            sleep(60)
+            continue
+        }
+        if (mergeable) {
+            return 0
+        } else {
+            error("PR is not mergeable.")
+        }
+    }
+    error("Timed out waiting for PR to be mergeable.")
+}
+
+def mergePR(prAPIUrl, gitHubApiToken) {
+    def sha = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+    callGitHubApi(
+        "PUT",
+        prAPIUrl,
+        gitHubApiToken,
+        [
+            "sha": sha,
+            "merge_method": "squash"
+        ]
+    )
+    print "Merged PR: ${prAPIUrl}."
+}
+
+def callGitHubApi(method, url, apiToken, data = null) {
+    def headers = "-H'Authorization: token ${apiToken}' -H'Content-Type: application/json'"
+    curlData = ""
+    if(data != null) {
+        def jsonData = JsonOutput.toJson(data)
+        curlData = "--data '${jsonData}'"
+    }
+
+    response = sh(script: "curl -s --fail -X '${method}' '${url}' ${headers} ${curlData}", returnStdout: true)
+
+    if (response == null) {
+        return null
+    }
+
+    return new JsonSlurper().parseText(response)
+}
+
+def findAndValidateJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraProjectKey, jiraVersionName) {
+    def responseJson = callJiraApi(
+        "GET",
+        "'${jiraRestApiUrl}'/project/'${jiraProjectKey}'/version?query='${jiraVersionName}'&status=unreleased&expand=issuesstatus",
+        jiraApiCredentialsId
+    )
+
+    if (responseJson.total == 0) {
+        error "Unable to find unreleased '${jiraVersionName}' version on Jira"
+    }
+
+    if (responseJson.total > 1) {
+        error "Found more than 1 Jira version matching '${jiraVersionName}'"
+    }
+
+    def version = responseJson.get("values").get(0)
+
+    if (version.get("issuesStatusForFixVersion").toDo < 0) {
+        error "Unable to release '${jiraVersionName}' Jira version - there are still tickets in 'toDo' state"
+    }
+
+    if (version.get("issuesStatusForFixVersion").inProgress < 0) {
+        error "Unable to release '${jiraVersionName}' Jira version - there are still tickets in 'inProgress' state"
+    }
+
+    return version
+}
+
+def releaseJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraVersionId, jiraProjectId) {
+    def json = callJiraApi(
+        "PUT",
+        "'${jiraRestApiUrl}'/version/'${jiraVersionId}'",
+        jiraApiCredentialsId,
+        [
+            "id": jiraVersionId,
+            "projectId": jiraProjectId,
+            "released": true,
+            "releaseDate": new Date().format("yyyy-MM-dd")
+        ]
+    )
+
+    if (json.released != true) {
+        error "'${jiraVersionName}' version in Jira has not been released"
+    }
+
+    return json
+}
+
+def unreleaseJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraVersionId, jiraProjectId) {
+    def json = callJiraApi(
+        "PUT",
+        "'${jiraRestApiUrl}'/version/'${jiraVersionId}'",
+        jiraApiCredentialsId,
+        [
+            "id": jiraVersionId,
+            "projectId": jiraProjectId,
+            "released": false,
+            "releaseDate": null
+        ]
+    )
+
+    return json
+}
+
+def callJiraApi(method, url, jiraApiCredentialsId, data = null) {
+    def curlData = ""
+    if(data != null) {
+        def jsonData = JsonOutput.toJson(data)
+        curlData = "--data '${jsonData}'"
+    }
+
+    def headerAccept = "Accept: application/json"
+    def headerContentType = "Content-Type: application/json"
+
+    //withCredentials([string(credentialsId: jiraApiCredentialsId, variable: 'credentialsVariable')]) {
+        def response = sh(script: "curl -s --fail --request '${method}' --url '${url}' --user '${jiraApiCredentialsId}' --header '${headerAccept}' --header '${headerContentType}' ${curlData}", returnStdout: true)
+    
+        if (response == null) {
+            error "Call to Jira API '${url}' failed"
+        }
+    
+        return new JsonSlurper().parseText(response)
+    //}
+}
