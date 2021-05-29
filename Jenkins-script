@@ -134,11 +134,25 @@ pipeline {
                 }
             }
         }
+        stage('Find and validate Jira DCA version') {
+            steps {
+                script {
+                    def jiraDcaVersion = findAndValidateJiraVersion(
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaProjectKey, jiraVersionName, false
+                    )
+
+                    if (jiraDcaVersion != null) {
+                        jiraDcaVersionId = jiraDcaVersion.id
+                        jiraDcaProjectId = jiraDcaVersion.projectId
+                    }
+                }
+            }
+        }
         stage('Find and validate Jira Endpoint version') {
             steps {
                 script {
                     def jiraEndpointVersion = findAndValidateJiraVersion(
-                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointProjectKey, jiraVersionName
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointProjectKey, jiraVersionName, true
                     )
 
                     jiraEndpointVersionId = jiraEndpointVersion.id
@@ -146,27 +160,17 @@ pipeline {
                 }
             }
         }
-        stage('Find and validate Jira DCA version') {
-            steps {
-                script {
-                    def jiraDcaVersion = findAndValidateJiraVersion(
-                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaProjectKey, jiraVersionName
-                    )
-
-                    jiraDcaVersionId = jiraDcaVersion.id
-                    jiraDcaProjectId = jiraDcaVersion.projectId
-                }
-            }
-        }
         stage('Release Jira versions') {
             steps {
                 script {
-                    releaseJiraVersion(
-                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointVersionId, jiraEndpointProjectId
-                    )
+                    if (jiraDcaVersionId != "") {
+                        releaseJiraVersion(
+                            jiraRestApiUrl, jiraApiCredentialsId, jiraDcaVersionId, jiraDcaProjectId
+                        )
+                    }
 
                     releaseJiraVersion(
-                        jiraRestApiUrl, jiraApiCredentialsId, jiraDcaVersionId, jiraDcaProjectId
+                        jiraRestApiUrl, jiraApiCredentialsId, jiraEndpointVersionId, jiraEndpointProjectId
                     )
                 }
             }
@@ -420,12 +424,16 @@ def callGitHubApi(method, url, githubCredentialsID, data = null) {
     }
 }
 
-def findAndValidateJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraProjectKey, jiraVersionName) {
+def findAndValidateJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraProjectKey, jiraVersionName, failWhenNotFound) {
     def responseJson = callJiraApi(
         "GET",
         "'${jiraRestApiUrl}'/project/'${jiraProjectKey}'/version?query='${jiraVersionName}'&status=unreleased&expand=issuesstatus",
         jiraApiCredentialsId
     )
+
+    if (responseJson.total == 0 && !failWhenNotFound) {
+        return null
+    }
 
     if (responseJson.total == 0) {
         error "Unable to find unreleased '${jiraVersionName}' version on Jira"
