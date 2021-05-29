@@ -5,14 +5,13 @@ import groovy.json.JsonOutput
 def pyForensicsAgentRepo = "PyForensicsAgent"
 def razorPropertiesRepo = "razor-properties"
 def repoOwner = "tfranckiewicz-r7"
-def githubCredentialsID = 'jenkins-tfranckiewicz-mc-333'
-def gitHubApiToken = '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'
+def githubCredentialsID = 'buffer5-postbox-tightness'
 def releaseJobName = 'py-forensics-agent-installer-release-mc-333'
 
 def jiraSubDomain = "it-bajt"
 def jiraEndpointProjectKey = "DESK"
 def jiraDcaProjectKey = "BIRTH"
-def jiraApiCredentialsId = "franckiewicz.tomasz@gmail.com:eiqjsxJgoAzBEO0KnCCa14F7"
+def jiraApiCredentialsId = "entourage-trickily-flounder"
 
 def propertiesFiles = [
     "properties/region/ap-northeast-1/service/endpoint-boss-app.yml",
@@ -25,14 +24,18 @@ def propertiesFiles = [
 ]
 
 // Do not modify
+// TODO: Change before pushing to R7
 def pyForensicsAgentRepoUrl = "https://github.com/${repoOwner}/${pyForensicsAgentRepo}"
-withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
-    pyForensicsAgentRepoUrl = "https://${env.gitCredUsername}:${gitHubApiToken}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
+// TODO: Delete before pushing to R7
+withCredentials([string(credentialsId: githubCredentialsID, variable: 'credentialsVariable')]) {
+    pyForensicsAgentRepoUrl = "https://${repoOwner}:${credentialsVariable}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
 }
 
+// TODO: Change before pushing to R7
 def razorPropertiesRepoUrl = "https://github.com/${repoOwner}/${razorPropertiesRepo}"
-withCredentials([usernamePassword(credentialsId: githubCredentialsID, usernameVariable: 'gitCredUsername', passwordVariable: 'gitCredPass')]) {
-    razorPropertiesRepoUrl = "https://${env.gitCredUsername}:${gitHubApiToken}@github.com/${repoOwner}/${razorPropertiesRepo}"
+// TODO: Delete before pushing to R7
+withCredentials([string(credentialsId: githubCredentialsID, variable: 'credentialsVariable')]) {
+    razorPropertiesRepoUrl = "https://${repoOwner}:${credentialsVariable}@github.com/${repoOwner}/${razorPropertiesRepo}"
 }
 
 def gitHubApiUrl = "https://api.github.com"
@@ -66,7 +69,9 @@ pipeline {
             steps {
                 sh 'git config --global credential.helper cache'
                 sh 'git config --global push.default simple'
+                // TODO: Delete before pushing to R7
                 sh 'git config --global user.email "Tomasz_Franckiewicz@rapid7.com"'
+                // TODO: Delete before pushing to R7
                 sh 'git config --global user.name "Tomasz Franckiewicz"'
             }
         }
@@ -75,7 +80,7 @@ pipeline {
                 script {
                     def tagName = findLatestReleaseTagName(
                         "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
-                        gitHubApiToken
+                        githubCredentialsID
                     )
 
                     latestReleaseEpochVersion = tagName.split("_").last()
@@ -207,16 +212,16 @@ pipeline {
                     print "Create PR"
                     def number = createPR(
                         "${gitHubApiUrl}/repos/${repoOwner}/${razorPropertiesRepo}",
-                        gitHubApiToken,
+                        githubCredentialsID,
                         repoOwner,
                         semanticVersion,
                         releaseBranchTmp
                     )
                     prAPIUrl = "${gitHubApiUrl}/repos/${repoOwner}/${razorPropertiesRepo}/pulls/${number}"
                     print "Wait for mergeable"
-                    waitPR(prAPIUrl, 60, gitHubApiToken)
+                    waitPR(prAPIUrl, 60, githubCredentialsID)
                     print "Merge"
-                    mergePR(prAPIUrl + "/merge", gitHubApiToken)
+                    mergePR(prAPIUrl + "/merge", githubCredentialsID)
                 }
             }
         }
@@ -228,7 +233,7 @@ pipeline {
     
                     createdReleaseId = createGitHubRelease(
                         "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
-                        gitHubApiToken,
+                        githubCredentialsID,
                         tagVersion,
                         releaseTitle,
                         releaseBranchName
@@ -277,7 +282,7 @@ pipeline {
                 if (createdReleaseId != "") {
                     deleteGitHubRelease(
                         "${gitHubApiUrl}/repos/${repoOwner}/${pyForensicsAgentRepo}",
-                        gitHubApiToken,
+                        githubCredentialsID,
                         createdReleaseId
                     )
 
@@ -309,11 +314,11 @@ def getCurrentEpochVersion() {
     return sh(script:"grep '__version__' agent/__init__.py", returnStdout: true).split("=")[1].trim().replaceAll("'", "")
 }
 
-def createGitHubRelease(gitHubApiUrl, gitHubApiToken, tagVersion, releaseTitle, releaseBranchName) {
+def createGitHubRelease(gitHubApiUrl, githubCredentialsID, tagVersion, releaseTitle, releaseBranchName) {
     def release = callGitHubApi(
         "POST",
         "${gitHubApiUrl}/releases",
-        gitHubApiToken,
+        githubCredentialsID,
         [
             "tag_name": tagVersion,
             "target_commitish": releaseBranchName,
@@ -324,29 +329,29 @@ def createGitHubRelease(gitHubApiUrl, gitHubApiToken, tagVersion, releaseTitle, 
     return release.id
 }
 
-def deleteGitHubRelease(gitHubApiUrl, gitHubApiToken, releaseId) {
+def deleteGitHubRelease(gitHubApiUrl, githubCredentialsID, releaseId) {
     callGitHubApi(
         "DELETE",
         "${gitHubApiUrl}/releases/${releaseId}",
-        gitHubApiToken
+        githubCredentialsID
     )
 }
 
-def findLatestReleaseTagName(gitHubApiUrl, gitHubApiToken) {
+def findLatestReleaseTagName(gitHubApiUrl, githubCredentialsID) {
     def release = callGitHubApi(
         "GET",
         "${gitHubApiUrl}/releases/latest",
-        gitHubApiToken
+        githubCredentialsID
     )
     
     return release.tag_name
 }
 
-def createPR(gitHubApiUrl, gitHubApiToken, repoOwner, semanticVersion, releaseBranchTmp) {
+def createPR(gitHubApiUrl, githubCredentialsID, repoOwner, semanticVersion, releaseBranchTmp) {
     def response = callGitHubApi(
         "POST",
         "${gitHubApiUrl}/pulls",
-        gitHubApiToken,
+        githubCredentialsID,
         [
             "title": "Agent Release: ${semanticVersion}",
             "head": "${repoOwner}:${releaseBranchTmp}",
@@ -357,14 +362,14 @@ def createPR(gitHubApiUrl, gitHubApiToken, repoOwner, semanticVersion, releaseBr
     return response.number
 }
 
-def waitPR(prAPIUrl, waitTimeSec, githubAPIToken) {
+def waitPR(prAPIUrl, waitTimeSec, githubCredentialsID) {
     def mergeable = false
     while (waitTimeSec > 0) {
         print "Waiting for PR to be mergeable: ${prAPIUrl}."
         def response = callGitHubApi(
             "GET",
             prAPIUrl,
-            githubAPIToken
+            githubCredentialsID
         )
         mergeable = response.mergeable
         if (mergeable == null) {
@@ -375,19 +380,19 @@ def waitPR(prAPIUrl, waitTimeSec, githubAPIToken) {
         }
         if (mergeable) {
             return 0
-        } else {
-            error("PR is not mergeable.")
         }
+        
+        error("PR is not mergeable.")
     }
     error("Timed out waiting for PR to be mergeable.")
 }
 
-def mergePR(prAPIUrl, gitHubApiToken) {
+def mergePR(prAPIUrl, githubCredentialsID) {
     def sha = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
     callGitHubApi(
         "PUT",
         prAPIUrl,
-        gitHubApiToken,
+        githubCredentialsID,
         [
             "sha": sha,
             "merge_method": "squash"
@@ -396,21 +401,23 @@ def mergePR(prAPIUrl, gitHubApiToken) {
     print "Merged PR: ${prAPIUrl}."
 }
 
-def callGitHubApi(method, url, apiToken, data = null) {
-    def headers = "-H'Authorization: token ${apiToken}' -H'Content-Type: application/json'"
-    curlData = ""
-    if(data != null) {
-        def jsonData = JsonOutput.toJson(data)
-        curlData = "--data '${jsonData}'"
+def callGitHubApi(method, url, githubCredentialsID, data = null) {
+    withCredentials([string(credentialsId: githubCredentialsID, variable: 'credentialsVariable')]) {
+        def headers = "-H'Authorization: token ${credentialsVariable}' -H'Content-Type: application/json'"
+        curlData = ""
+        if(data != null) {
+            def jsonData = JsonOutput.toJson(data)
+            curlData = "--data '${jsonData}'"
+        }
+    
+        response = sh(script: "curl -s -X '${method}' '${url}' ${headers} ${curlData}", returnStdout: true)
+    
+        if (response == null) {
+            return null
+        }
+    
+        return new JsonSlurper().parseText(response)
     }
-
-    response = sh(script: "curl -s -X '${method}' '${url}' ${headers} ${curlData}", returnStdout: true)
-
-    if (response == null) {
-        return null
-    }
-
-    return new JsonSlurper().parseText(response)
 }
 
 def findAndValidateJiraVersion(jiraRestApiUrl, jiraApiCredentialsId, jiraProjectKey, jiraVersionName) {
@@ -487,13 +494,13 @@ def callJiraApi(method, url, jiraApiCredentialsId, data = null) {
     def headerAccept = "Accept: application/json"
     def headerContentType = "Content-Type: application/json"
 
-    //withCredentials([string(credentialsId: jiraApiCredentialsId, variable: 'credentialsVariable')]) {
-        def response = sh(script: "curl -s --fail --request '${method}' --url '${url}' --user '${jiraApiCredentialsId}' --header '${headerAccept}' --header '${headerContentType}' ${curlData}", returnStdout: true)
+    withCredentials([string(credentialsId: jiraApiCredentialsId, variable: 'credentialsVariable')]) {
+        def response = sh(script: "curl -s --fail --request '${method}' --url '${url}' --user '${credentialsVariable}' --header '${headerAccept}' --header '${headerContentType}' ${curlData}", returnStdout: true)
     
         if (response == null) {
             error "Call to Jira API '${url}' failed"
         }
     
         return new JsonSlurper().parseText(response)
-    //}
+    }
 }
