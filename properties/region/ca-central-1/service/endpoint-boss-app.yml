@@ -19,7 +19,7 @@ properties:
   # Number of seconds after which a beacon message would represent healthy status of a host
   endpoint.boss.healthy.beacon.threshold: 1800
   # Mapping of organization ID's to endpoint scan agent versions. This version must be compatible with the endpoint scanner data source (an installer build).
-  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1620076296
+  endpoint.boss.orgid.scanagentversion.mapping: DEFAULT=1621353659
   # Mapping of organization ID's to endpoint agent versions. Use 'DEFAULT' for organization ID to indicate default version.
   # d9be728d-e368-46c2-af29-95598bd749f2 - Internal Integration Testing
   #  _    _  _____ ______    _____       _______ ______ _  ________ ______ _____  ______ _____
@@ -42,7 +42,7 @@ properties:
   #     \_____/ /
   #       \____/
   #
-  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1620076296,d9be728d-e368-46c2-af29-95598bd749f2=1554913774
+  endpoint.boss.orgid.agentversion.mapping: DEFAULT=1621353659,d9be728d-e368-46c2-af29-95598bd749f2=1554913774
 
   # FIM Whitelist Customization
   # Org specific whitelist additions for Linux paths
