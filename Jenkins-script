@@ -4,14 +4,19 @@ import groovy.json.JsonOutput
 // To define
 def pyForensicsAgentRepo = "PyForensicsAgent"
 def razorPropertiesRepo = "razor-properties"
-def repoOwner = "tfranckiewicz-r7"
-def githubCredentialsID = 'buffer5-postbox-tightness'
-def releaseJobName = 'py-forensics-agent-installer-release-mc-333'
+def repoOwner = "rapid7"
 
-def jiraSubDomain = "it-bajt"
-def jiraEndpointProjectKey = "DESK"
-def jiraDcaProjectKey = "BIRTH"
-def jiraApiCredentialsId = "entourage-trickily-flounder"
+def pyForensicsAgentRepoUrl = "git@github.com:${repoOwner}/${pyForensicsAgentRepo}.git"
+def razorPropertiesRepoUrl = "git@github.com:${repoOwner}/${razorPropertiesRepo}.git"
+
+def gitHubApiUrl = "https://api.github.com"
+def githubCredentialsID = "35ec7429-ac9c-419d-9be6-7559a69c8d5c"
+def releaseJobName = "py-forensics-agent-installer-version-release"
+
+def jiraRestApiUrl = "https://issues.corp.rapid7.com/rest/api/3"
+def jiraEndpointProjectKey = "ENDPOINT"
+def jiraDcaProjectKey = "DCA"
+def jiraApiCredentialsId = "324e4cb7-7514-44a4-8221-6ec04bd10f06"
 
 def propertiesFiles = [
     "properties/region/ap-northeast-1/service/endpoint-boss-app.yml",
@@ -24,22 +29,6 @@ def propertiesFiles = [
 ]
 
 // Do not modify
-// TODO: Change before pushing to R7
-def pyForensicsAgentRepoUrl = "https://github.com/${repoOwner}/${pyForensicsAgentRepo}"
-// TODO: Delete before pushing to R7
-withCredentials([string(credentialsId: githubCredentialsID, variable: 'credentialsVariable')]) {
-    pyForensicsAgentRepoUrl = "https://${repoOwner}:${credentialsVariable}@github.com/${repoOwner}/${pyForensicsAgentRepo}"
-}
-
-// TODO: Change before pushing to R7
-def razorPropertiesRepoUrl = "https://github.com/${repoOwner}/${razorPropertiesRepo}"
-// TODO: Delete before pushing to R7
-withCredentials([string(credentialsId: githubCredentialsID, variable: 'credentialsVariable')]) {
-    razorPropertiesRepoUrl = "https://${repoOwner}:${credentialsVariable}@github.com/${repoOwner}/${razorPropertiesRepo}"
-}
-
-def gitHubApiUrl = "https://api.github.com"
-
 def latestReleaseEpochVersion = ""
 def releaseBranchName = ""
 def releaseBranchTmp = ""
@@ -50,7 +39,6 @@ def tagVersion = ""
 def createdReleaseId = ""
 def releaseBranchTmpPushed = false
 
-def jiraRestApiUrl = "https://'${jiraSubDomain}'.atlassian.net/rest/api/3"
 def jiraVersionName = ""
 def jiraEndpointVersionId = ""
 def jiraEndpointProjectId = ""
@@ -69,10 +57,6 @@ pipeline {
             steps {
                 sh 'git config --global credential.helper cache'
                 sh 'git config --global push.default simple'
-                // TODO: Delete before pushing to R7
-                sh 'git config --global user.email "Tomasz_Franckiewicz@rapid7.com"'
-                // TODO: Delete before pushing to R7
-                sh 'git config --global user.name "Tomasz Franckiewicz"'
             }
         }
         stage('Set latestReleaseEpochVersion') {
