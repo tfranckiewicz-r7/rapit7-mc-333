@@ -1,7 +1,6 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
-// To define
 def pyForensicsAgentRepo = "PyForensicsAgent"
 def razorPropertiesRepo = "razor-properties"
 def repoOwner = "rapid7"
@@ -28,7 +27,6 @@ def propertiesFiles = [
     "properties/region/us-west-2/service/endpoint-boss-app.yml"
 ]
 
-// Do not modify
 def latestReleaseEpochVersion = ""
 def releaseBranchName = ""
 def releaseBranchTmp = ""
