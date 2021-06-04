@@ -10,7 +10,7 @@ def pyForensicsAgentRepoUrl = "git@github.com:${repoOwner}/${pyForensicsAgentRep
 def razorPropertiesRepoUrl = "git@github.com:${repoOwner}/${razorPropertiesRepo}.git"
 
 def gitHubApiUrl = "https://api.github.com"
-def githubCredentialsID = "35ec7429-ac9c-419d-9be6-7559a69c8d5c"
+def githubCredentialsID = "0982c84d-528c-40c3-8a25-bd7e16a36772"
 def releaseJobName = "py-forensics-agent-installer-version-release"
 
 def jiraRestApiUrl = "https://issues.corp.rapid7.com/rest/api/3"
